@@ -1,0 +1,32 @@
+- First line is the width
+- Second line is the height (in this example we will use five)
+- This is the block data and extends for height lines and width characters across
+- This is the block data and extends for height lines and width characters across
+- This is the block data and extends for height lines and width characters across
+- This is the block data and extends for height lines and width characters across
+- This is the block data and extends for height lines and width characters across
+- Then is the total number of subArtifacts in the level (in this example we will use two)
+- This line is for the subArtifact name
+- sub artifact id
+- sub artifact x
+- sub artifact y
+- This line is for the subArtifact name
+- sub artifact id
+- sub artifact x
+- sub artifact y
+- This is the total number of decorations in the level (in this example we will use five)
+- decoration id
+- decoration x
+- decoration y
+- decoration id
+- decoration x
+- decoration y
+- decoration id
+- decoration x
+- decoration y
+- decoration id
+- decoration x
+- decoration y
+- decoration id
+- decoration x
+- decoration y
