@@ -1,1 +1,3 @@
 # Artifact
+
+Artifact is one of the largest projects I have worked on, and this project represents how much I have learned since I began developing in Java roughly four years ago.  This game contains a total (currently) of 16 unique levels all in a singular world.  As for the future development of this project, the dream is to have a total of 5 worlds with a grand total of 80 levels.  Also music and sound need to be developed for this project. Feel free to download the project and try it out, to do this use the clone and download button, download the zip file, then extract this zipped file and launch the most recent version of the game.
