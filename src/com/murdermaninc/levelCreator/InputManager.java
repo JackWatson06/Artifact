@@ -17,6 +17,9 @@ public class InputManager implements MouseListener, KeyListener, MouseWheelListe
 	public boolean s = false;
 	public boolean c = false;
 	public boolean m = false;
+	public boolean plus = false;
+	public boolean minus = false;
+	public boolean n = false;
 	
 	public int menuDepiction = 0;
 	
@@ -39,6 +42,9 @@ public class InputManager implements MouseListener, KeyListener, MouseWheelListe
 		if(e.getKeyCode() == KeyEvent.VK_C) c = true;
 		if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_Z) controlZ = true;
 		if(e.getKeyCode() == KeyEvent.VK_SHIFT) shift = true;
+		if(e.getKeyCode() == KeyEvent.VK_L) plus = true;
+		if(e.getKeyCode() == KeyEvent.VK_K) minus = true;
+		if(e.getKeyCode() == KeyEvent.VK_N) n = true;
 		if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
 			escapeCounter++;
 			if(escapeCounter == 2){
@@ -52,6 +58,9 @@ public class InputManager implements MouseListener, KeyListener, MouseWheelListe
 		if(e.getKeyCode() == KeyEvent.VK_S) s = false;
 		if(e.getKeyCode() == KeyEvent.VK_C) c = false;
 		if(e.getKeyCode() == KeyEvent.VK_SHIFT) shift = false;
+		if(e.getKeyCode() == KeyEvent.VK_L) plus = false;
+		if(e.getKeyCode() == KeyEvent.VK_K) minus = false;
+		if(e.getKeyCode() == KeyEvent.VK_N) n = false;
 	}
 
 	public void keyTyped(KeyEvent e) {

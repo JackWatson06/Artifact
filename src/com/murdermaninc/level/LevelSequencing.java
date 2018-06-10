@@ -12,7 +12,7 @@ import com.murdermaninc.main.Main;
 
 public class LevelSequencing{
 
-	public final int totalLevels = 18;
+	public final int totalLevels = 19;
 	public final int totalWorlds = 5;
 	//These should all be equal in length
 	public boolean[] levelAvailability = new boolean[totalLevels];
@@ -76,9 +76,18 @@ public class LevelSequencing{
 			if(levelNumber == 13) main.loadLevel("Level1-14", 14, 1);
 			if(levelNumber == 14) main.loadLevel("Level1-15", 15, 1);
 			if(levelNumber == 15) main.loadLevel("Level1-16", 16, 1);
-			if(levelNumber == 16) main.mainShipWorld = true;
+			if(levelNumber == 16) {
+				main.reset();
+				main.mainShipWorld = true;
+				main.loadShip = "kingsChambers";
+			}
 			
 		}else if(worldNumber == 2){
+			
+			System.out.println("Testing2");
+			if(levelNumber == 1) main.loadLevel("Level2-2", 2, 2);
+			if(levelNumber == 2) main.loadLevel("Level2-3", 3, 2);
+			
 			
 		}
 	}
@@ -184,6 +193,22 @@ public class LevelSequencing{
 			if(levelNumber == 15) return 2;
 			if(levelNumber == 16) return 5;
 		}else if(worldNumber == 2){
+			if(levelNumber == 1) return 4;
+			if(levelNumber == 2) return 3;
+			if(levelNumber == 3) return 3;
+			if(levelNumber == 4) return 4;
+			if(levelNumber == 5) return 3;
+			if(levelNumber == 6) return 2;
+			if(levelNumber == 7) return 2;
+			if(levelNumber == 8) return 2;
+			if(levelNumber == 9) return 4;
+			if(levelNumber == 10) return 2;
+			if(levelNumber == 11) return 3;
+			if(levelNumber == 12) return 4;
+			if(levelNumber == 13) return 3;
+			if(levelNumber == 14) return 3;
+			if(levelNumber == 15) return 3;
+			if(levelNumber == 16) return 5;
 			
 		}
 		return 0;
@@ -206,13 +231,18 @@ public class LevelSequencing{
 				openWorlds[0] = true;
 				
 				BufferedWriter bw = new BufferedWriter(new FileWriter(levelSeq));
-				
+
 				bw.write("{");
 				bw.write("\n");
 				
 				for(int i = 0; i < totalLevels; i++){
-					bw.write("Level1-" + (i + 1));
-					bw.write("\n");
+					if(i < 16) {
+						bw.write("Level1-" + (i + 1));
+						bw.write("\n");
+					}else if(i < 32) {
+						bw.write("Level2-" + ((i + 1) - 16));
+						bw.write("\n");
+					}
 					if(i == 0){
 						bw.write("True");
 					}else{
@@ -245,6 +275,7 @@ public class LevelSequencing{
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+
 		}
 		
 		//This loads the data from the levelSequencing file
@@ -302,6 +333,7 @@ public class LevelSequencing{
 				}
 			}
 		}*/
+		
 	}
 	
 	public void saveLevelSequence(){

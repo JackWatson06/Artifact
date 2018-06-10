@@ -1,7 +1,6 @@
 package com.murdermaninc.collectionBackground;
 
 import com.murdermaninc.decorations.artifacts.DecorationArtifact;
-import com.murdermaninc.graphics.Background;
 import com.murdermaninc.graphics.Font;
 import com.murdermaninc.graphics.Screen;
 import com.murdermaninc.level.LevelSequencing;
@@ -9,8 +8,6 @@ import com.murdermaninc.level.LevelSequencing;
 
 public class CollectionBackground {
 
-	private Background semiTransparentBackground;
-	
 	private Screen collectionScreen;
 	
 	public Font font = new Font();
@@ -23,6 +20,8 @@ public class CollectionBackground {
 	private SubArtifactShards[] shardArt;
 	private Continue continueButton;
 	
+	private int tranpsarentColor;
+	
 	//TODO this class does not need a render or tick method as NOTHING is moving other than the continue button so maby actually keep it specifically for the continue button but everything else does not need
 	//to be rendered in the render method it only needs to be rendered once.
 	
@@ -34,14 +33,20 @@ public class CollectionBackground {
 		
 		//HELLO if your reading this, how are you!!!
 		
-		semiTransparentBackground = new Background("/CollectionBackground.png", true);
-		semiTransparentBackground.scaleImage(4, width, height);
+		//This screen is specifically created only for loading in the data of the completion screen
+		//as the screen we render it to is the screenTiles and it would be inefficient to always have these spriteSheets
+		//loaded in that screen object
 		
-		collectionScreen = new Screen(width, height, 0, 0, 1);
+		//Also all data loading occurs in the constructer of the objects.
 		
-		for(int i = 0; i < semiTransparentBackground.pixels.length; i++){
-			collectionScreen.pixels[i] = semiTransparentBackground.pixels[i];
-		}
+		int alphaValue = 129;
+		
+		//This color is stored in twos complement as all other color values are
+		this.tranpsarentColor = (~(alphaValue << 24) + 1);
+		
+		collectionScreen = new Screen(width, height, 0, 0);
+		
+		
 		
 		collectionScreen.loadSpriteSheet("/PoopyArtifactCell.png", "ArtifactCell");
 		collectionScreen.loadSpriteSheet("/TitleBar.png", "TitleSprite");
@@ -49,18 +54,6 @@ public class CollectionBackground {
 		collectionScreen.loadSpriteSheet("/CompletionBar.png", "CompletionBarSprite");
 		collectionScreen.loadSpriteSheet("/ShardCanister.png", "ShardCanisters");
 		collectionScreen.loadSpriteSheet("/SubArtifactCanister.png", "SubArtifactCanister");
-		
-		int currentLevelNumber = levelS.getCurrentLevel().levelNumber;
-		
-		if(currentLevelNumber < 9){
-			collectionScreen.loadSpriteSheet("/icons.png", "Icons");
-		}else if(currentLevelNumber >= 9 && currentLevelNumber <= 12){
-			collectionScreen.loadSpriteSheet("/iconsdarker.png", "Icons");
-		}else if(currentLevelNumber > 12 && currentLevelNumber <= 16){
-			collectionScreen.loadSpriteSheet("/icons.png", "Icons");
-		}
-		
-		
 		collectionScreen.loadSpriteSheet("/font.png", "font");
 		collectionScreen.loadSpriteSheet("/ShardCanisterTitles.png", "shardTitles");
 		collectionScreen.loadSpriteSheet("/ContinueButton.png", "continue");
@@ -68,13 +61,13 @@ public class CollectionBackground {
 		
 		String currentLevelString = currentLevel.substring(0, 5) + ":" + currentLevel.substring(5, currentLevel.length());
 		
-		title = new Title(currentLevelString, width);
+		title = new Title(collectionScreen, currentLevelString, width);
 		
-		time = new Time(levelS, finishTime, thresholdTime);
+		time = new Time(collectionScreen, levelS, finishTime, thresholdTime);
 		
-		compBar = new CompletionBar(levelS, true, time.timeBonus, totalLevelArtifacts, subArtifacts.length);
+		compBar = new CompletionBar(collectionScreen, levelS, true, time.timeBonus, totalLevelArtifacts, subArtifacts.length);
 		
-		mainArt = new MainArtifactCanister(artifact.xTile, artifact.yTile, artifact.widthPixels, artifact.heightPixels);
+		mainArt = new MainArtifactCanister(collectionScreen, artifact.xTile, artifact.yTile, artifact.widthPixels, artifact.heightPixels);
 		
 		
 		int spacing = 25;
@@ -92,26 +85,26 @@ public class CollectionBackground {
 			//Scans the current found artifacts and if the current canister number is equal to the id of the found subArtifact then a canister is added with a shard.
 			for(int j = 0; j < subArtifacts.length; j++){
 				if(subArtifacts[j][2] == i){
-					shardArt[i] = new SubArtifactShards(currentX + ((i * spacing) + (i * 232)), currentY + (384 / 2) - (332 / 2), subArtifacts[j], i);
+					shardArt[i] = new SubArtifactShards(collectionScreen, currentX + ((i * spacing) + (i * 232)), currentY + (384 / 2) - (332 / 2), subArtifacts[j], i);
 					addNull = false;
 				}
 			}
 			
 			//Adds empty canister if the sub artifact was not listing in the found artifacts array or subArtifacts.
 			if(addNull){
-				shardArt[i] = new SubArtifactShards(currentX + ((i * spacing) + (i * 232)), currentY + (384 / 2) - (332 / 2), null, i);
+				shardArt[i] = new SubArtifactShards(collectionScreen, currentX + ((i * spacing) + (i * 232)), currentY + (384 / 2) - (332 / 2), null, i);
 			}
 			
 			currentI = i;
 		}
 		currentI++;
 		if(subArtifacts.length == totalLevelArtifacts){
-			subArt = new SubArtifactCanister(currentX + ((currentI * spacing) + (currentI * 232)), currentY, true, completedSubArtifact);
+			subArt = new SubArtifactCanister(collectionScreen, currentX + ((currentI * spacing) + (currentI * 232)), currentY, true, completedSubArtifact);
 		}else{
-			subArt = new SubArtifactCanister(currentX + ((currentI * spacing) + (currentI * 232)), currentY, false, completedSubArtifact);
+			subArt = new SubArtifactCanister(collectionScreen, currentX + ((currentI * spacing) + (currentI * 232)), currentY, false, completedSubArtifact);
 		}
 		
-		continueButton = new Continue(width, height);
+		continueButton = new Continue(collectionScreen, width, height);
 		
 	}
 	
@@ -125,22 +118,52 @@ public class CollectionBackground {
 	
 	//THIS SCREEN IS THE COLLECTION SCREEN
 	
+	public boolean firstTimeRender = true;
+	
 	public void render(Screen screen, float interpolation){
 		
-		title.render(screen);
-		mainArt.render(screen);
-		time.render(screen);
-		compBar.render(screen);
-		for(int i = 0; i < shardArt.length; i++){
-			shardArt[i].render(screen);
+		if(firstTimeRender) {
+			
+			int a1 = (tranpsarentColor >> 24) & 0xFF;
+			int r1 = (tranpsarentColor >> 16) & 0xFF;
+			int g1 = (tranpsarentColor >> 8) & 0xFF;
+			int b1 = (tranpsarentColor) & 0xFF;
+			
+			
+			float rat1 = (float) a1 / 255;
+			float rat2 = 1 - ((float) a1 / 255);
+
+			for(int i = 0; i < screen.pixels.length; i++) {
+				
+				int color = screen.pixels[i];
+				
+				int r2 = (color >> 16) & 0xFF;
+				int g2 = (color >> 8) & 0xFF;
+				int b2 = (color) & 0xFF;
+				
+				int r = Math.round(Math.min((r1 * rat1) + (r2 * rat2), 255));
+				int g = Math.round(Math.min((g1 * rat1) + (g2 * rat2), 255));
+				int b = Math.round(Math.min((b1 * rat1) + (b2 * rat2), 255));
+				
+				screen.pixels[i] = (-1 << 24) | (r << 16) | (g << 8) | b;
+				
+			}
+			
+			title.render(screen);
+			mainArt.render(screen);
+			time.render(screen);
+			compBar.render(screen);
+			for(int i = 0; i < shardArt.length; i++){
+				shardArt[i].render(screen);
+			}
+			subArt.render(screen);
+			
+			firstTimeRender = false;
 		}
-		subArt.render(screen);
+	
 		continueButton.render(screen, interpolation);
 		
 	}
-	
-	public Screen getScreen(){
-		return collectionScreen;
-	}
+
 }
 

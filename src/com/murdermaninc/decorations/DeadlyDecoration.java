@@ -1,11 +1,11 @@
 package com.murdermaninc.decorations;
 
-import com.mudermaninc.entity.Player;
+import com.murdermaninc.entity.Player;
 
 public class DeadlyDecoration extends Decoration{
 
 	private int leftOffset, rightOffset, topOffset, bottomOffset;
-	private String deathTag;
+	public String deathTag;
 	
 	
 	public DeadlyDecoration(int id, int x, int y, int xTile, int yTile, int spriteWidth, int spriteHeight, int render, String deathTag, int leftOffset, int rightOffset, int topOffset, int bottomOffset) {

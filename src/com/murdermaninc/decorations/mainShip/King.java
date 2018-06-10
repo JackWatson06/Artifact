@@ -173,6 +173,7 @@ public class King extends DecorationShip{
 		
 		if(blinkAnimation == null)	blinkAnimation = animationBlink.loadAnimationData(screen, "shipIcons", 4, 3, 0, 10, spriteWidth, spriteHeight);
 		if(moveAnimation == null)  moveAnimation = animationBlink.loadAnimationData(screen, "shipIcons", 4, 3, 10, 0, spriteWidth, spriteHeight);
+		if(Data == null) Data = screen.loadData(xTile, yTile, spriteWidth, spriteHeight, 4, "shipIcons");
 		
 		if(!animationMove.random){
 			animationBlink.animateRandom(screen, blinkAnimation, true, 10, spriteWidth, spriteHeight, 0.0008F, x, y, 5, interpolation);
@@ -183,7 +184,7 @@ public class King extends DecorationShip{
 		}
 		
 		if(!animationBlink.random && !animationMove.random){
-			screen.render(x, y, xTile, yTile, spriteWidth, spriteHeight, 4, "shipIcons");
+			screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 		}
 		
 		if(textBox != null && displayText) {

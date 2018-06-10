@@ -1,6 +1,6 @@
 package com.murdermaninc.decorations;
 
-import com.mudermaninc.entity.Player;
+import com.murdermaninc.entity.Player;
 
 public class ClimableVine extends Decoration{
 
@@ -9,7 +9,7 @@ public class ClimableVine extends Decoration{
 	}
 	
 	public void tick(Player player){
-		if(player.x + 63 - 8 >= x && player.x + 8 <= x + 63 && player.y + 63 >= y && player.y + 4 <= y + 63 && player.input.e && !player.isClimbingHorizontal){
+		if(player.x + 63 - 8 >= x && player.x + 8 <= x + 63 && player.y + 63 >= y + (4 * 4) && player.y + 4 <= y + (4 * 4) + 63 && player.input.e && !player.isClimbingHorizontal){
 			player.input.e = false;
 			player.isClimbingHorizontal = true;
 			player.y = y + 48; 

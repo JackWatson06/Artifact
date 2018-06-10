@@ -19,14 +19,12 @@ public class SubArtifactShards {
 	private int xPixel, yPixel;
 	private int shardXTile, shardYTile;
 	private boolean renderShard = false;
-	private int shardLogo;
 	
 	private boolean artifactFound;
 	
-	public SubArtifactShards(int x, int y, int[] subArtifacts, int shardLogo){
+	public SubArtifactShards(Screen screen, int x, int y, int[] subArtifacts, int shardLogo){
 		this.x = x;
 		this.y = y;
-		this.shardLogo = shardLogo;
 		
 		if(subArtifacts != null){
 			artifactFound = true;
@@ -37,6 +35,18 @@ public class SubArtifactShards {
 			yPixel = subArtifacts[4];
 		}else{
 			artifactFound = false;
+		}
+		
+		if(testing){
+			if(!artifactFound){
+				Data.add(screen.loadData(0, 0, 4, 6, 4, "ShardCanisters"));
+			}else{
+				Data.add(screen.loadData(0, 6, 4, 6, 4, "ShardCanisters"));
+			}
+			testing = false;
+		}
+		if(shardData == null){
+			shardData = screen.loadData(0, shardLogo, 3, 1, 4, "shardTitles");
 		}
 	}
 	
@@ -84,24 +94,13 @@ public class SubArtifactShards {
 	}
 	
 	public void render(Screen screen){
-		if(testing){
-			if(!artifactFound){
-				Data.add(screen.loadData(0, 0, 4, 6, 4, "ShardCanisters"));
-			}else{
-				Data.add(screen.loadData(0, 6, 4, 6, 4, "ShardCanisters"));
-			}
-			testing = false;
-		}
-		if(shardData == null){
-			shardData = screen.loadData(0, shardLogo, 3, 1, 4, "shardTitles");
-		}
 		
-		screen.renderData(Data.get(0), x, y, 4, 6, 4);
-		screen.renderData(shardData, x + 40, y + 12	, 3, 1, 4);
+		screen.renderData(Data.get(0), x + screen.screenX, y + screen.screenY, 4, 6, 4);
+		screen.renderData(shardData, x + 40 + screen.screenX, y + 12  + screen.screenY, 3, 1, 4);
 		if(renderShard){
 			//System.out.println(xPixel);
 			//System.out.println(yPixel);
-			screen.render(x  + (232 / 2) - (xPixel * 8 / 2), y + (332 / 2) - (yPixel * 8 / 2), shardXTile, shardYTile, 1, 1, 8, "Icons");
+			screen.render(x  + (232 / 2) - (xPixel * 8 / 2)  + screen.screenX, y + (332 / 2) - (yPixel * 8 / 2) + screen.screenY, shardXTile, shardYTile, 1, 1, 8, "Icons");
 		}
 	}
 }

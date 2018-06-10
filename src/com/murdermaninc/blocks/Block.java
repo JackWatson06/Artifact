@@ -36,14 +36,11 @@ public class Block {
 	}
 	
 	public void loadData(Screen screen){
-			Data = screen.loadData(xTile, yTile, 1, 1, 4, "Icons");
+		Data = screen.loadData(xTile, yTile, 1, 1, 4, "Icons");
 	}
 	
 	public void render(Screen screen, Level level, int x, int y){
 		screen.renderData(Data, x * 64, y * 64, 1, 1, 4);
 	}
-	
-	
-	
 	
 }

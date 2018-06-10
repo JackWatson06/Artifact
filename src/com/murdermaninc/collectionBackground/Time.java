@@ -15,7 +15,7 @@ public class Time {
 	//This does not take into account the pause time
 	
 	
-	public Time(LevelSequencing levelS, float endingTime, float thresholdTime){
+	public Time(Screen screen, LevelSequencing levelS, float endingTime, float thresholdTime){
 		if(endingTime < thresholdTime){			
 			timeBonus = true;
 		}else{
@@ -24,9 +24,7 @@ public class Time {
 		
 		totalTime = endingTime;
 		levelS.saveTime((float) (Math.round(totalTime * 10.0) / 10.0));
-	}
-	
-	public void render(Screen screen){
+		
 		if(Data == null){
 			if(timeBonus == false){
 				Data = screen.loadData(0, 2, 6, 2, 4, "TimeSprite");
@@ -35,9 +33,13 @@ public class Time {
 			}
 		}
 		
-		screen.renderData(Data, 1140, 210, 6, 2, 4);
+	}
+	
+	public void render(Screen screen){
+
+		screen.renderData(Data, 1140 + screen.screenX, 210 + screen.screenY, 6, 2, 4);
 		
-		font.drawText(screen, "Time:" + (Math.round(totalTime * 10.0) / 10.0) + "s", 1140 + (10 * 4), 210 + ((30 / 2) * 4) - (6 * 2) - (4 * 2), 2);
+		font.drawText(screen, "Time:" + (Math.round(totalTime * 10.0) / 10.0) + "s", 1140 + (10 * 4) + screen.screenX, 210 + ((30 / 2) * 4) - (6 * 2) - (4 * 2) + screen.screenY, 2);
 		 
 		
 	}

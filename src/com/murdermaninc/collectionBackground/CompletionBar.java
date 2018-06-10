@@ -17,7 +17,7 @@ public class CompletionBar {
 	
 	private int completionPercentage = 0;
 	
-	public CompletionBar(LevelSequencing levelS, boolean mainArtifact, boolean timeBonus, int totalShardsInLevel, int numberOfShards){
+	public CompletionBar(Screen screen, LevelSequencing levelS, boolean mainArtifact, boolean timeBonus, int totalShardsInLevel, int numberOfShards){
 		
 		x = (1140 + ((6 * 64) / 2)) - ((125 * 4) / 2);
 		y = 440;
@@ -36,17 +36,14 @@ public class CompletionBar {
 			score += 0.333333333F;
 		}else{
 			float shardWorth = 0.3333333333F / totalShardsInLevel;
-			System.out.println(shardWorth);
+			//System.out.println(shardWorth);
 			score += numberOfShards * shardWorth;
 		}
 		
 		completionPercentage = (int) (score * 100);
 		
 		levelS.savePercentage(completionPercentage);
-
-	}
-	
-	public void render(Screen screen){
+		
 		if(Data == null){
 			if(completionPercentage == 100){
 				Data = screen.loadData(0, 0, 8, 2, 4, "CompletionBarSprite");
@@ -80,17 +77,21 @@ public class CompletionBar {
 				}
 			}
 		}
+
+	}
+	
+	public void render(Screen screen){
 		
 		//(1140 + ((6 * 16) / 2)) - ((125 * 4) / 2)
 		
-		screen.renderData(Data, x, y, 8, 2, 4);
-		screen.renderData(completionColor, x + 4, y + 56, 8, 1, 4);
+		screen.renderData(Data, x + screen.screenX, y + screen.screenY, 8, 2, 4);
+		screen.renderData(completionColor, x + 4 + screen.screenX, y + 56 + screen.screenY, 8, 1, 4);
 		
 		//(1140 + ((6 * 64) / 2)) - ((125 * 4) / 2) = 1082
 		
 		//CHANGE THE PNG AS CURRENTLY THE SECOION FOR THE TITLE CONTAINS AN ODD NUMBER OF PIXELS
 		
-		font.drawText(screen, "Completion:" + completionPercentage + "%", (1082 + ((125 * 4) / 2)) - (font.getTextLength("Completion:" + completionPercentage + "%", 2 ) / 2), 440 + ((14 / 2) * 4) - (6 * 2) - (4 * 2) , 2);
+		font.drawText(screen, "Completion:" + completionPercentage + "%", (1082 + ((125 * 4) / 2)) - (font.getTextLength("Completion:" + completionPercentage + "%", 2 ) / 2) + screen.screenX, 440 + ((14 / 2) * 4) - (6 * 2) - (4 * 2) + screen.screenY, 2);
 	}
 	
 }

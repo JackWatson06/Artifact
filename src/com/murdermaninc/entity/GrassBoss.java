@@ -1,4 +1,4 @@
-package com.mudermaninc.entity;
+package com.murdermaninc.entity;
 
 import java.io.IOException;
 
@@ -14,12 +14,11 @@ public class GrassBoss extends Entity{
 	//private int spriteWidth, spriteHeight;
 	private int animationTime = 0;
 	
-	public GrassBoss(String name, int x, int y, int spriteWidth, int spriteHeight){
-		this.x = x;
-		this.y = y;
+	public GrassBoss(int id, int x, int y, int xTile, int yTile, int spriteWidth, int spriteHeight, String name){
+		super(id, x, y, xTile, yTile, spriteWidth, spriteHeight);
+		
 		this.name = name;
-		this.spriteWidth = spriteWidth;
-		this.spriteHeight = spriteHeight;
+
 	}
 	
 	public void render(Screen screen){

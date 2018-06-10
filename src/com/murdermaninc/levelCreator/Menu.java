@@ -17,6 +17,8 @@ public class Menu {
 	private Decoration[] decorations = new Decoration[1];
 	private DecorationSubArtifact[] subArtifacts = new DecorationSubArtifact[0];
 	
+	private float scale;
+	
 	public boolean showing = false;
 	
 	private Screen screen;
@@ -27,7 +29,9 @@ public class Menu {
 		screen.loadSpriteSheet("/editorMenu.png", "editorMenu");
 	}
 	
-	public void tick(){
+	public void tick(float mouseScale){
+		
+		scale = mouseScale;
 		
 		menuDepiction = main.input.menuDepiction;
 		
@@ -175,8 +179,9 @@ public class Menu {
 	//70 * 4 = 280
 	
 	public boolean checkMouseCollision(){
-		int mouseX = MouseInfo.getPointerInfo().getLocation().x + screen.screenX;
-		int mouseY = MouseInfo.getPointerInfo().getLocation().y + screen.screenY;
+		int mouseX = (int) (MouseInfo.getPointerInfo().getLocation().x / scale) + screen.screenX;
+		int mouseY = (int) (MouseInfo.getPointerInfo().getLocation().y / scale) + screen.screenY;
+		
 		
 		if(mouseX > menuX && mouseX < menuX + 520 && mouseY < menuY + 280 && mouseY > menuY){
 			return true;
@@ -186,8 +191,8 @@ public class Menu {
 	}
 	
 	public void mouseClickCollision(){
-		int mouseX = MouseInfo.getPointerInfo().getLocation().x + screen.screenX;
-		int mouseY = MouseInfo.getPointerInfo().getLocation().y + screen.screenY;
+		int mouseX = (int) (MouseInfo.getPointerInfo().getLocation().x / scale) + screen.screenX;
+		int mouseY = (int) (MouseInfo.getPointerInfo().getLocation().y / scale) + screen.screenY;
 		
 		if(menuDepiction == 0){
 			for(int i = 0; i < currentBlocks.length; i++){

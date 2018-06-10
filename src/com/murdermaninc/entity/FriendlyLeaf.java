@@ -1,4 +1,4 @@
-package com.mudermaninc.entity;
+package com.murdermaninc.entity;
 
 
 import com.murdermaninc.blocks.Block;
@@ -22,16 +22,11 @@ public class FriendlyLeaf extends Entity{
 	private int[] Data;
 	
 	public FriendlyLeaf(int id, int x, int y, int xTile, int yTile, int spriteWidth, int spriteHeight){
-		this.id = id;
-		this.x = x;
+		super(id, x, y, xTile, yTile, spriteWidth, spriteHeight);
+		
 		startX = x;
 		notRoundedX = (float) x;
-		this.y = y;
 		startY = y;
-		this.xTile = xTile;
-		this.yTile = yTile;
-		this.spriteWidth = spriteWidth;
-		this.spriteHeight = spriteHeight;
 	}
 	
 	private float slope = -2F;
@@ -41,7 +36,7 @@ public class FriendlyLeaf extends Entity{
 	
 
 	@Override
-	public void tick(Level level){
+	public void tick(Level level, Player player){
 		if(!layFlat){
 			if(bValue == 0F){
 				bValue = (slope * (0 - startX)) + startY;
@@ -99,7 +94,7 @@ public class FriendlyLeaf extends Entity{
 	}
 	
 	@Override
-	public void render(Screen screen, float interpolation, float testInterpolation){
+	public void render(Screen screen, float interpolation){
 		if(AnimationData == null){
 			Data = screen.loadData(9, 14, 1, 1, 4, "Icons");
 			AnimationData = animation.loadAnimationData(screen, "Icons", 4, 7, 2, 14, spriteWidth, spriteHeight);

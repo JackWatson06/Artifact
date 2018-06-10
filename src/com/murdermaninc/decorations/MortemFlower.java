@@ -1,8 +1,8 @@
 package com.murdermaninc.decorations;
 
-import com.mudermaninc.entity.Entity;
-import com.mudermaninc.entity.Player;
-import com.mudermaninc.entity.Pricker;
+import com.murdermaninc.entity.Entity;
+import com.murdermaninc.entity.Player;
+import com.murdermaninc.entity.Pricker;
 
 public class MortemFlower extends DeadlyDecoration{
 
@@ -19,11 +19,11 @@ public class MortemFlower extends DeadlyDecoration{
 	public void tick(Player player){
 		if(spawnCounter >= 110){
 			if(direction){
-				Entity.entities.add(new Pricker(1, x + 36 , y + 68, 1, 16, 1, 1, direction, player));
-				Entity.entities.add(new Pricker(1, x + 28 , y + 96, 1, 16, 1, 1, direction, player));
+				Entity.entities.add(new Pricker(1, x + 36 , y + 68, 1, 16, 1, 1, direction));
+				Entity.entities.add(new Pricker(1, x + 28 , y + 96, 1, 16, 1, 1, direction));
 			}else{
-				Entity.entities.add(new Pricker(1, x + 16, y + 68, 9, 16, 1, 1, direction, player));
-				Entity.entities.add(new Pricker(1, x + 24, y + 96, 9, 16, 1, 1, direction, player));
+				Entity.entities.add(new Pricker(1, x + 16, y + 68, 9, 16, 1, 1, direction));
+				Entity.entities.add(new Pricker(1, x + 24, y + 96, 9, 16, 1, 1, direction));
 			}
 			spawnCounter = 0;
 		}else{

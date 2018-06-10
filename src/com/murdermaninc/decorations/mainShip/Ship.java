@@ -62,12 +62,13 @@ public class Ship extends DecorationShip{
 	@Override
 	public void render(Screen screen, float interpolation){
 		if(animationData == null) animationData = animation.loadAnimationDataRectangle(screen, "shipIcons", 4, 57, xTile, yTile, spriteWidth, spriteHeight, 13, 5);
+		if(Data == null) Data = screen.loadData(12, 0, spriteWidth, spriteHeight, 4, "shipIcons");
 		
 		if(playAnimation){
 		//animation.animateContinuous(screen, animationData, false, 7.0F, spriteWidth, spriteHeight, x, y, 13, 4);
 			animation.animateOnce(screen, animationData, false, 8.0F, spriteWidth, spriteHeight, x, y, 57, 4, interpolation);
 		}else{
-			screen.render(x, y, 12, 0, spriteWidth, spriteHeight, 4, "shipIcons");
+			screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 		}
 	}
 

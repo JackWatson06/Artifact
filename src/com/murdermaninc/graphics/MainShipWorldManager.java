@@ -2,7 +2,7 @@ package com.murdermaninc.graphics;
 
 import java.util.ArrayList;
 
-import com.mudermaninc.entity.Player;
+import com.murdermaninc.entity.Player;
 import com.murdermaninc.decorations.mainShip.Bed;
 import com.murdermaninc.decorations.mainShip.DecorationShip;
 import com.murdermaninc.decorations.mainShip.Door;
@@ -44,7 +44,7 @@ public class MainShipWorldManager {
 	boolean once = true;
 	boolean lock = false;
 	
-	public MainShipWorldManager(Main main, String section, InputManager input, int width, int height){
+	public MainShipWorldManager(Main main, String section, int loadLevel, InputManager input, int width, int height){
 		
 		beginningTime = System.nanoTime();
 		
@@ -65,7 +65,7 @@ public class MainShipWorldManager {
 			//ROOM
 			
 			
-			shipScreen = new Screen(width, height, 0, 0, 0);
+			shipScreen = new Screen(width, height, 0, 0);
 			currentBackground = new Background("/PlayerRoom.png", true);
 			currentBackground.scaleImage(4, width, height);
 			shipScreen.loadSpriteSheet("/PlayerBedAnimation.png", "playerBed");
@@ -92,7 +92,7 @@ public class MainShipWorldManager {
 			//DORM
 			
 			
-			shipScreen = new Screen(width, height, 0, 0, 0);
+			shipScreen = new Screen(width, height, 0, 0);
 			currentBackground = new Background("/DormsSpace.png", true);
 			currentBackground.scaleImage(4, width, height);
 			shipScreen.loadSpriteSheet("/BlueShipDoor.png", "blueDoor");
@@ -117,7 +117,7 @@ public class MainShipWorldManager {
 			
 			decorations.add(new LargeShipDoor(this, 1, 1532, 696, 0, 0, 6, 5, true, 0, LargeShipDoor.GREEN));
 			
-			player = new Player("player", input, null, 122, 460);
+			player = new Player(0, 0, 0, 1, 1, "player", input, null, 122, 460);
 			player.currentShipRoom = currentRoom;
 			for(int i = 0; i < decorations.size(); i++){
 				if(decorations.get(i) instanceof Elevator){
@@ -132,7 +132,7 @@ public class MainShipWorldManager {
 			
 			//CORRIDOR
 			
-			shipScreen = new Screen(width, height, 0, 0, 0);
+			shipScreen = new Screen(width, height, 0, 0);
 			currentBackground = new Background("/CorridorWindow.png", true);
 			currentBackground.scaleImage(4, width * 2, height);
 			shipScreen.loadSpriteSheet("/PlayerSprites.png", "player");
@@ -160,7 +160,7 @@ public class MainShipWorldManager {
 			
 
 			
-			player = new Player("player", input, null, 204, 952);
+			player = new Player(0, 0, 0, 1, 1,"player", input, null, 204, 952);
 			player.currentShipRoom = currentRoom;
 			
 			
@@ -172,7 +172,7 @@ public class MainShipWorldManager {
 			//KINGS CHAMBERS
 			
 			
-			shipScreen = new Screen(width, height, 0, 0, 0);
+			shipScreen = new Screen(width, height, 0, 0);
 			currentBackground = new Background("/KingsDorms.png", true);
 			currentBackground.scaleImage(4, width, height);
 			shipScreen.loadSpriteSheet("/PlayerSprites.png", "player");
@@ -194,7 +194,7 @@ public class MainShipWorldManager {
 				decorations.add(new DecorationShip(this, 0, 940, 30, 15, 5, 2));
 			}
 			
-			player = new Player("player", input, null, 296, 952);
+			player = new Player(0, 0, 0, 1, 1, "player", input, null, 296, 952);
 			//444
 			player.currentShipRoom = currentRoom;
 			
@@ -204,10 +204,11 @@ public class MainShipWorldManager {
 			
 			//POD ROOM
 			
-			shipScreen = new Screen(width, height, 0, 0, 0);
+			shipScreen = new Screen(width, height, 0, 0);
 			currentBackground = new Background("/PodRoom.png", true);
 			currentBackground.scaleImage(4, width, height);
 			shipScreen.loadSpriteSheet("/PlayerSprites.png", "player");
+			shipScreen.loadSpriteSheet("/font.png", "font");
 			shipScreen.loadSpriteSheet("/BlackShipDoor.png", "blackDoor");
 			shipScreen.loadSpriteSheet("/LightgreenShipDoor.png", "lightgreenDoor");
 			shipScreen.loadSpriteSheet("/DarkgreenShipDoor.png", "darkgreenDoor");
@@ -263,27 +264,28 @@ public class MainShipWorldManager {
 			
 			//decorations.add(new Door(this, 7, 1632, 760, 0, 0, 4, 4, true, 0, Door.BLACK));
 			
-			player = new Player("player", input, null, 128, 952);
+			player = new Player(0, 0, 0, 1, 1, "player", input, null, 128, 952);
 			player.currentShipRoom = currentRoom;
 			
 		}else if(section.equals("lightGreenLaunch")){
 			
-			shipScreen = new Screen(width, height, 0, 0, 0);
+			shipScreen = new Screen(width, height, 0, 0);
 			currentBackground = new Background("/LaunchRoomWindow.png", true);
 			currentBackground.scaleImage(4, width, height);
 			shipScreen.loadSpriteSheet("/LightgreenShipDoor.png", "lightgreenDoor");
 			shipScreen.loadSpriteSheet("/PlayerSprites.png", "player");
-			shipScreen.loadSpriteSheet("/LaunchLeverVertical.png", "lever");
 			shipScreen.loadSpriteSheet("/font.png", "font");
-			shipScreen.loadSpriteSheet("/LaunchRoomIconsFlickering2.png", "shipIcons");
+			shipScreen.loadSpriteSheet("/LaunchRoomIcons.png", "shipIcons");
 			
 			currentRoom = section;
 			
 			decorations.add(new Door(this, 1, 32, 760, 0, 0, 4, 4, true, 0, Door.LIGHTGREEN));
-			decorations.add(new Lever(this, 564, 856, 0, 0, 1, 2));
+			decorations.add(new Monitor(this, levelS, 1, loadLevel, 436, 468, 0, 0, 5, 6));
+
 			for(int i = 0; i < decorations.size(); i++){
-				if(decorations.get(i) instanceof Lever){
-					decorations.add(new Monitor(this, (Lever) decorations.get(i), levelS, 1, 436, 468, 0, 0, 5, 6));
+				if(decorations.get(i) instanceof Monitor){
+					decorations.add(new Lever(this, (Monitor) decorations.get(i), 0, 508, 856, 5, 4, 1, 2));
+					decorations.add(new Lever(this, (Monitor) decorations.get(i), 1, 628, 856, 5, 6, 1, 2));
 				}
 			}
 			for(int i = 0; i < decorations.size(); i++){
@@ -291,27 +293,28 @@ public class MainShipWorldManager {
 					decorations.add(new Ship(this, (Monitor) decorations.get(i), 1348, 876, 0, 8, 3, 3));
 				}
 			}
-			player = new Player("player", input, null, 1392, 952);
+			player = new Player(0, 0, 0, 1, 1, "player", input, null, 1392, 952);
 			player.currentShipRoom = "launchRoom";
 			
 		}else if(section.equals("darkGreenLaunch")){
 			
-			shipScreen = new Screen(width, height, 0, 0, 0);
+			shipScreen = new Screen(width, height, 0, 0);
 			currentBackground = new Background("/LaunchRoomWindow.png", true);
 			currentBackground.scaleImage(4, width, height);
 			shipScreen.loadSpriteSheet("/DarkgreenShipDoor.png", "darkgreenDoor");
 			shipScreen.loadSpriteSheet("/PlayerSprites.png", "player");
-			shipScreen.loadSpriteSheet("/LaunchLeverVertical.png", "lever");
 			shipScreen.loadSpriteSheet("/font.png", "font");
-			shipScreen.loadSpriteSheet("/LaunchRoomIconsFlickering2.png", "shipIcons");
+			shipScreen.loadSpriteSheet("/LaunchRoomIcons.png", "shipIcons");
 			
 			currentRoom = section;
 			
 			decorations.add(new Door(this, 1, 32, 760, 0, 0, 4, 4, true, 0, Door.DARKGREEN));
-			decorations.add(new Lever(this, 564, 856, 0, 0, 1, 2));
+			decorations.add(new Monitor(this, levelS, 2, loadLevel, 436, 468, 0, 0, 5, 6));
+
 			for(int i = 0; i < decorations.size(); i++){
-				if(decorations.get(i) instanceof Lever){
-					decorations.add(new Monitor(this, (Lever) decorations.get(i), levelS, 2, 436, 468, 0, 0, 5, 6));
+				if(decorations.get(i) instanceof Monitor){
+					decorations.add(new Lever(this, (Monitor) decorations.get(i), 0, 508, 856, 5, 4, 1, 2));
+					decorations.add(new Lever(this, (Monitor) decorations.get(i), 1, 628, 856, 5, 6, 1, 2));
 				}
 			}
 			for(int i = 0; i < decorations.size(); i++){
@@ -319,7 +322,7 @@ public class MainShipWorldManager {
 					decorations.add(new Ship(this, (Monitor) decorations.get(i), 1348, 876, 0, 8, 3, 3));
 				}
 			}
-			player = new Player("player", input, null, 1392, 952);
+			player = new Player(0, 0, 0, 1, 1, "player", input, null, 1392, 952);
 			player.currentShipRoom = "launchRoom";
 			
 		}
@@ -365,7 +368,7 @@ public class MainShipWorldManager {
 			decorations.add(new Intercom(this, 926, 304, 1, 4, 1, 1, shipData.playerRoom));
 			
 			if(playerLocation == 0) {
-				player = new Player("player", input, null, 580, 716);
+				player = new Player(0, 0, 0, 1, 1, "player", input, null, 580, 716);
 				player.currentShipRoom = currentRoom;
 			}else {
 				player = null;
@@ -415,9 +418,9 @@ public class MainShipWorldManager {
 				decorations.add(new LargeShipDoor(this, 1, 1532, 696, 0, 0, 6, 5, true, 3, LargeShipDoor.GREEN));
 			}
 			if(playerLocation == 1){
-				player = new Player("player", input, null, 122, 460);
+				player = new Player(0, 0, 0, 1, 1, "player", input, null, 122, 460);
 			}else if(playerLocation == 2){
-				player = new Player("player", input, null, 1696, 952);
+				player = new Player(0, 0, 0, 1, 1, "player", input, null, 1696, 952);
 				player.facing = true;
 			}
 			player.currentShipRoom = currentRoom;
@@ -475,9 +478,9 @@ public class MainShipWorldManager {
 			
 
 			if(playerLocation == 1){
-				player = new Player("player", input, null, 204, 952);
+				player = new Player(0, 0, 0, 1, 1, "player", input, null, 204, 952);
 			}else if(playerLocation == 2){
-				player = new Player("player", input, null, 3568, 952);
+				player = new Player(0, 0, 0, 1, 1, "player", input, null, 3568, 952);
 				player.facing = true;
 			}
 			player.currentShipRoom = currentRoom;
@@ -520,10 +523,10 @@ public class MainShipWorldManager {
 			}
 			
 			if(playerLocation == 1){
-				player = new Player("player", input, null, 296, 952);
+				player = new Player(0, 0, 0, 1, 1, "player", input, null, 296, 952);
 				//444
 			}else if(playerLocation == 2) {
-				player = new Player("player", input, null, 1160, 952);
+				player = new Player(0, 0, 0, 1, 1, "player", input, null, 1160, 952);
 				player.facing = true;
 			}
 			player.currentShipRoom = currentRoom;
@@ -537,6 +540,7 @@ public class MainShipWorldManager {
 			currentBackground = new Background("/PodRoom.png", true);
 			currentBackground.scaleImage(4, width, height);
 			shipScreen.loadSpriteSheet("/PlayerSprites.png", "player");
+			shipScreen.loadSpriteSheet("/font.png", "font");
 			shipScreen.loadSpriteSheet("/BlackShipDoor.png", "blackDoor");
 			shipScreen.loadSpriteSheet("/LightgreenShipDoor.png", "lightgreenDoor");
 			shipScreen.loadSpriteSheet("/DarkgreenShipDoor.png", "darkgreenDoor");
@@ -617,22 +621,22 @@ public class MainShipWorldManager {
 			//This determines the player location based off of the door they exit
 			
 			if(playerLocation == 1){
-				player = new Player("player", input, null, 128, 952);
+				player = new Player(0, 0, 0, 1, 1, "player", input, null, 128, 952);
 				player.currentShipRoom = currentRoom;
 			}else if(playerLocation == 2){
-				player = new Player("player", input, null, 416, 952);
+				player = new Player(0, 0, 0, 1, 1, "player", input, null, 416, 952);
 				player.currentShipRoom = currentRoom;
 			}else if(playerLocation == 3){
-				player = new Player("player", input, null, 672, 952);
+				player = new Player(0, 0, 0, 1, 1, "player", input, null, 672, 952);
 				player.currentShipRoom = currentRoom;
 			}else if(playerLocation == 4){
-				player = new Player("player", input, null, 928, 952);
+				player = new Player(0, 0, 0, 1, 1, "player", input, null, 928, 952);
 				player.currentShipRoom = currentRoom;
 			}else if(playerLocation == 5){
-				player = new Player("player", input, null, 1184, 952);
+				player = new Player(0, 0, 0, 1, 1, "player", input, null, 1184, 952);
 				player.currentShipRoom = currentRoom;
 			}else if(playerLocation == 6){
-				player = new Player("player", input, null, 1440, 952);
+				player = new Player(0, 0, 0, 1, 1, "player", input, null, 1440, 952);
 				player.currentShipRoom = currentRoom;
 			}
 			
@@ -645,16 +649,17 @@ public class MainShipWorldManager {
 				currentBackground.scaleImage(4, width, height);
 				shipScreen.loadSpriteSheet("/LightgreenShipDoor.png", "lightgreenDoor");
 				shipScreen.loadSpriteSheet("/PlayerSprites.png", "player");
-				shipScreen.loadSpriteSheet("/LaunchLeverVertical.png", "lever");
 				shipScreen.loadSpriteSheet("/font.png", "font");
-				shipScreen.loadSpriteSheet("/LaunchRoomIconsFlickering2.png", "shipIcons");
+				shipScreen.loadSpriteSheet("/LaunchRoomIcons.png", "shipIcons");
 				currentRoom = newStage;
 				
 				decorations.add(new Door(this, 1, 32, 760, 0, 0, 4, 4, true, 3, Door.LIGHTGREEN));
-				decorations.add(new Lever(this, 564, 856, 0, 0, 1, 2));
+				decorations.add(new Monitor(this, levelS, 1, 1, 436, 468, 0, 0, 5, 6));
+
 				for(int i = 0; i < decorations.size(); i++){
-					if(decorations.get(i) instanceof Lever){
-						decorations.add(new Monitor(this, (Lever) decorations.get(i), levelS, 1, 436, 468, 0, 0, 5, 6));
+					if(decorations.get(i) instanceof Monitor){
+						decorations.add(new Lever(this, (Monitor) decorations.get(i), 0, 508, 856, 5, 4, 1, 2));
+						decorations.add(new Lever(this, (Monitor) decorations.get(i), 1, 628, 856, 5, 6, 1, 2));
 					}
 				}
 				for(int i = 0; i < decorations.size(); i++){
@@ -663,7 +668,7 @@ public class MainShipWorldManager {
 					}
 				}
 				
-				player = new Player("player", input, null, 128, 952);
+				player = new Player(0, 0, 0, 1, 1, "player", input, null, 128, 952);
 				player.currentShipRoom = "launchRoom";
 				
 			}else if(newStage.equals("darkGreenLaunch")){
@@ -675,16 +680,17 @@ public class MainShipWorldManager {
 				currentBackground.scaleImage(4, width, height);
 				shipScreen.loadSpriteSheet("/DarkgreenShipDoor.png", "darkgreenDoor");
 				shipScreen.loadSpriteSheet("/PlayerSprites.png", "player");
-				shipScreen.loadSpriteSheet("/LaunchLeverVertical.png", "lever");
 				shipScreen.loadSpriteSheet("/font.png", "font");
-				shipScreen.loadSpriteSheet("/LaunchRoomIconsFlickering2.png", "shipIcons");
+				shipScreen.loadSpriteSheet("/LaunchRoomIcons.png", "shipIcons");
 				currentRoom = newStage;
 				
 				decorations.add(new Door(this, 1, 32, 760, 0, 0, 4, 4, true, 3, Door.DARKGREEN));
-				decorations.add(new Lever(this, 564, 856, 0, 0, 1, 2));
+				decorations.add(new Monitor(this, levelS, 2, 1, 436, 468, 0, 0, 5, 6));
+
 				for(int i = 0; i < decorations.size(); i++){
-					if(decorations.get(i) instanceof Lever){
-						decorations.add(new Monitor(this, (Lever) decorations.get(i), levelS, 2, 436, 468, 0, 0, 5, 6));
+					if(decorations.get(i) instanceof Monitor){
+						decorations.add(new Lever(this, (Monitor) decorations.get(i), 0, 508, 856, 5, 4, 1, 2));
+						decorations.add(new Lever(this, (Monitor) decorations.get(i), 1, 628, 856, 5, 6, 1, 2));
 					}
 				}
 				for(int i = 0; i < decorations.size(); i++){
@@ -693,7 +699,7 @@ public class MainShipWorldManager {
 					}
 				}
 				
-				player = new Player("player", input, null, 128, 952);
+				player = new Player(0, 0, 0, 1, 1, "player", input, null, 128, 952);
 				player.currentShipRoom = "launchRoom";
 				
 			}
@@ -727,6 +733,7 @@ public class MainShipWorldManager {
 	public void loadLevel(String loadLevel, int levelNumber, int worldNumber){
 		decorations.clear();
 		shipScreen.removeSpriteSheets();
+		System.out.println("Level Load");
 		main.loadLevel(loadLevel, levelNumber, worldNumber);
 	}
 	

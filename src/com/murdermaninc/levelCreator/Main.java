@@ -10,6 +10,8 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -62,8 +64,13 @@ public class Main extends Canvas implements Runnable{
 	public int world = 0;
 	
 	static Dimension ScreenSize = Toolkit.getDefaultToolkit().getScreenSize();
-	public static final int width = (int) ScreenSize.getWidth();
-	public static final int height = (int) ScreenSize.getHeight();
+	public static final int screenWidth = (int) ScreenSize.getWidth();
+	public static final int screenHeight = (int) ScreenSize.getHeight();
+	
+	public static int width = 1920;
+	public static int height = 1080;
+	
+	private static float scale = (float) (screenWidth) / width;
 	
 	public int levelWidth;
 	public int levelHeight;
@@ -224,37 +231,13 @@ public class Main extends Canvas implements Runnable{
 		screen = new Screen(width, height, 0, 0, 0);
 		cursor = new Cursor();
 		
-		
-		if(world == 1){
-			if(level >= 1 && level <= 4 || level == 17){
-				screen.loadSpriteSheet("/icons.png", "iconsPlains");
-				screen.loadSpriteSheet("/icons_Forest.png", "iconsForest");
-				screen.loadSpriteSheet("/trees_Decoration.png", "iconsTree");
-			}else if(level >= 5 && level <= 8){
-				screen.loadSpriteSheet("/icons.png", "iconsPlains");
-				screen.loadSpriteSheet("/icons_Forest.png", "iconsForest");
-				screen.loadSpriteSheet("/trees_Decoration.png", "iconsTree");
-			}else if(level > 8 && level<= 12){
-				screen.loadSpriteSheet("/iconsdarker.png", "iconsPlains");
-				screen.loadSpriteSheet("/icons_Forest.png", "iconsForest");
-				screen.loadSpriteSheet("/trees_Decoration.png", "iconsTree");
-			}else if(level > 12 && level<=16){
-				screen.loadSpriteSheet("/icons.png", "iconsPlains");
-				screen.loadSpriteSheet("/icons_Forest.png", "iconsForest");
-				screen.loadSpriteSheet("/trees_Decoration.png", "iconsTree");
-			}
-		}else if(world == 2){
-			if(level >= 1 && level <= 4){
-				screen.loadSpriteSheet("/icons.png", "iconsPlains");
-				screen.loadSpriteSheet("/icons_Forest.png", "iconsForest");
-				screen.loadSpriteSheet("/trees_Decoration.png", "iconsTree");
-			}
-		}
-
+		screen.loadSpriteSheet("/icons.png", "iconsPlains");
+		screen.loadSpriteSheet("/icons_Forest.png", "iconsForest");
+		screen.loadSpriteSheet("/trees_Decoration.png", "iconsTree");
 		screen.loadSpriteSheet("/font.png", "font");
 		
 		menu = new Menu(this, screen);
-		miniMap = new MiniMap(this, levelWidth, levelHeight, width, levelData, decorationData, subArtifactData);
+		miniMap = new MiniMap(this, levelWidth, levelHeight, levelData, decorationData, subArtifactData);
 		if(world == 1){
 			if(level >= 1 && level <= 4 || level == 17){
 				backgroundManager = new BackgroundManager("/1.1-4 Background.png", width, height, true);
@@ -327,7 +310,7 @@ public class Main extends Canvas implements Runnable{
 		
 		int scrollSpeed = 16;
 		
-		if(MouseInfo.getPointerInfo().getLocation().x == 1919){
+		if(MouseInfo.getPointerInfo().getLocation().x == screenWidth - 1){
 			screen.screenX += scrollSpeed;
 			
 			if(screen.screenX < 0){
@@ -341,7 +324,7 @@ public class Main extends Canvas implements Runnable{
 			}
 		}
 		
-		if(MouseInfo.getPointerInfo().getLocation().y == 1079){
+		if(MouseInfo.getPointerInfo().getLocation().y == screenHeight - 1){
 			screen.screenY += scrollSpeed;
 			
 			if(screen.screenY < 0){
@@ -383,7 +366,7 @@ public class Main extends Canvas implements Runnable{
 			}
 		}
 		
-		cursor.tick(screen);
+		cursor.tick(screen, scale);
 		
 		
 		if(input.controlZ){
@@ -400,6 +383,121 @@ public class Main extends Canvas implements Runnable{
 				
 				loadBDData();
 			}
+		}
+		
+		if(input.plus) {
+			
+			//This prevents
+			int originalHeight = height;
+			int originalWidth = width;
+			
+			//Multiplying by the aspect ration of the monitor that is why it is multiples of 16 and also 9
+			height = height + 18;
+			width = width + 32;
+			
+			
+			
+			if(height > levelHeight * 64 && !(width > levelWidth * 64)) {
+				
+				//This is used to maintain aspect ratio because if the height is set to the same as the levelHeight it would 
+				//loose it's aspect ratio as a levelHeight is not divisable by 64
+				
+				height = levelHeight * 64;
+				
+				int heightChange = originalHeight - height;
+				
+				float widthChange = heightChange * ((float) 16 / 9);
+				
+				width = width - (int) Math.round(widthChange);
+				
+
+			}else if(width > levelWidth * 64) {
+				
+				//This is used to maintain aspect ratio because if the height is set to the same as the levelHeight it would 
+				//loose it's aspect ratio as a levelHeight is not divisable by 64
+				
+				width = levelWidth * 64;
+				
+				int widthChange = originalWidth - width;
+				
+				float heightChange = widthChange * ((float) 9 / 16);
+				
+				height = height - (int) Math.round(heightChange);
+				
+			}
+			
+			
+			if(originalHeight != height && originalWidth != width) {
+
+				screen.height = height;
+				screen.width = width;
+
+				screen.image = new BufferedImage(screen.width, screen.height, BufferedImage.TYPE_INT_RGB);
+				screen.pixels = ((DataBufferInt) screen.image.getRaster().getDataBuffer()).getData();
+			}else {
+				height = originalHeight;
+				width = originalWidth;
+			}
+			
+			scale = (float) (screenWidth) / width;
+			
+			if(height + screen.screenY > levelHeight * 64) {
+				screen.screenY-=((screen.screenY + height) - (levelHeight * 64));
+			}
+			
+			if(width + screen.screenX > levelWidth * 64) {
+				screen.screenX-=((screen.screenX + width) - (levelWidth * 64));
+			}
+			
+			input.plus = false;
+		}
+		
+		if(input.minus) {
+			
+			//This prevents
+			int originalHeight = height;
+			int originalWidth = width;
+			
+			height = height - 18;
+			width = width - 32;
+			
+			if(height <= 0 || width <= 0) {
+				height = 18;
+				width = 32;
+			}
+
+			if(originalHeight != height && originalWidth != width) {
+
+				screen.height = height;
+				screen.width = width;
+
+				screen.image = new BufferedImage(screen.width, screen.height, BufferedImage.TYPE_INT_RGB);
+				screen.pixels = ((DataBufferInt) screen.image.getRaster().getDataBuffer()).getData();
+			}else {
+				height = originalHeight;
+				width = originalWidth;
+			}
+			
+			scale = (float) (screenWidth) / width;
+			
+			
+			input.minus = false;
+		}
+		
+		if(input.n) {
+			
+			
+			height = 1080;
+			width = 1920;
+			
+			scale = (float) (screenWidth) / width;
+			
+			screen.height = height;
+			screen.width = width;
+
+			screen.image = new BufferedImage(screen.width, screen.height, BufferedImage.TYPE_INT_RGB);
+			screen.pixels = ((DataBufferInt) screen.image.getRaster().getDataBuffer()).getData();
+			
 		}
 
 		
@@ -680,7 +778,7 @@ public class Main extends Canvas implements Runnable{
 			olderSubArtifacts.remove(0);
 		}
 		
-		menu.tick();
+		menu.tick(scale);
 		
 		miniMap.updateMiniMap(levelData, decorationData, subArtifactData);
 		
@@ -743,7 +841,7 @@ public class Main extends Canvas implements Runnable{
 		
 		cursor.render(screen);
 		
-		miniMap.render(screen, input);
+		miniMap.render(screen, input, width, height);
 		
 		menu.render();
 		
@@ -766,7 +864,7 @@ public class Main extends Canvas implements Runnable{
 		
 		//Draws the buffered images to the screen
 		Graphics g = bs.getDrawGraphics();
-		g.drawImage(screen.image, 0, 0, width, height, null);
+		g.drawImage(screen.image, 0, 0, screenWidth, screenHeight, null);
 		g.dispose();
 		bs.show();
 	}
@@ -1093,6 +1191,7 @@ public class Main extends Canvas implements Runnable{
 				if(levelData[x + y * levelWidth] == 97) Block.blocks[x + y * levelWidth] = new Block(97, x, y, 1, 8);
 				if(levelData[x + y * levelWidth] == 98) Block.blocks[x + y * levelWidth] = new Block(98, x, y, 2, 8);
 				if(levelData[x + y * levelWidth] == 99) Block.blocks[x + y * levelWidth] = new Block(99, x, y, 3, 8);
+				if(levelData[x + y * levelWidth] == 100) Block.blocks[x + y * levelWidth] = new Block(100, x, y, 15, 24);
 			}
 		}
 		
@@ -1171,6 +1270,12 @@ public class Main extends Canvas implements Runnable{
 			if(decorationData[i] == 2056) Decoration.decorations.add(new Decoration(2056, currentX, currentY, 3, 5, 1, 1, 1));
 			if(decorationData[i] == 2057) Decoration.decorations.add(new Decoration(2057, currentX, currentY, 0, 11, 2, 1, 2));
 			if(decorationData[i] == 2058) Decoration.decorations.add(new Decoration(2058, currentX, currentY, 4, 6, 1, 8, 3));
+			if(decorationData[i] == 2059) Decoration.decorations.add(new Decoration(2059, currentX, currentY, 0, 20, 3, 4, 1));
+			if(decorationData[i] == 2060) Decoration.decorations.add(new Decoration(2060, currentX, currentY, 3, 20, 3, 4, 1));
+			if(decorationData[i] == 2061) Decoration.decorations.add(new Decoration(2061, currentX, currentY, 6, 20, 3, 4, 1));
+			if(decorationData[i] == 2062) Decoration.decorations.add(new Decoration(2062, currentX, currentY, 4, 5, 1, 1, 1));
+			if(decorationData[i] == 2063) Decoration.decorations.add(new Decoration(2063, currentX, currentY, 5, 6, 1, 1, 1));
+			if(decorationData[i] == 2064) Decoration.decorations.add(new Decoration(2064, currentX, currentY, 10, 18, 5, 6, 1));
 			
 			
 			//Artifact ID's    2750 - 3000
@@ -1360,8 +1465,8 @@ public class Main extends Canvas implements Runnable{
 	
 	//!!!REMEMBER TO CHANGE THIS!!!
 	
-	public int maxBlockId = 99;
-	public int maxDecorationId = 2058;
+	public int maxBlockId = 100;
+	public int maxDecorationId = 2064;
 	public int maxArtifactId = 2781;
 	public int maxSubArtifactId = 3097;
 	
@@ -1472,6 +1577,7 @@ public class Main extends Canvas implements Runnable{
 		if(id == 97) return new Block(97, x, y, 1, 8);
 		if(id == 98) return new Block(98, x, y, 2, 8);
 		if(id == 99) return new Block(99, x, y, 3, 8);
+		if(id == 100) return new Block(100, x, y, 15, 24);
 				
 		return null;
 	}
@@ -1537,6 +1643,12 @@ public class Main extends Canvas implements Runnable{
 		if(id == 2056) return new Decoration(2056, currentX, currentY, 3, 5, 1, 1, 1);
 		if(id == 2057) return new Decoration(2057, currentX, currentY, 0, 11, 2, 1, 2);
 		if(id == 2058) return new Decoration(2058, currentX, currentY, 4, 6, 1, 8, 3);
+		if(id == 2059) return new Decoration(2059, currentX, currentY, 0, 20, 3, 4, 1);
+		if(id == 2060) return new Decoration(2060, currentX, currentY, 3, 20, 3, 4, 1);
+		if(id == 2061) return new Decoration(2061, currentX, currentY, 6, 20, 3, 4, 1);
+		if(id == 2062) return new Decoration(2062, currentX, currentY, 4, 5, 1, 1, 1);
+		if(id == 2063) return new Decoration(2063, currentX, currentY, 5, 6, 1, 1, 1);
+		if(id == 2064) return new Decoration(2064, currentX, currentY, 10, 18, 5, 6, 1);
 		
 		return null;
 	}
@@ -1752,7 +1864,7 @@ public class Main extends Canvas implements Runnable{
 		
 		frame.setVisible(true);
 		
-		//loadText.setText("Level1-16");
+		loadText.setText("Level2-2");
 		
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		frame.setLocation(dim.width / 2 - frame.getSize().width / 2,dim.height / 2 - frame.getSize().height / 2);

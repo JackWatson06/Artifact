@@ -58,29 +58,31 @@ public class LargeShipDoor extends DecorationShip{
 		if(collisions){
 			if(doorColor.equals("green")){
 				if(animationData == null) animationData = animation.loadAnimationDataRectangle(screen, "green", 4, 4, xTile, yTile, spriteWidth, spriteHeight, 2, 2);
-
+				if(Data == null) Data = screen.loadData(0, 0, spriteWidth, spriteHeight, 4, "green");
 
 				if(manager.player != null){
 					animation.animateCollision(screen, manager.player, animationData, true, 10.0F, spriteWidth, spriteHeight, x, y, 68, (spriteHeight * 64), 76, 312, 3, interpolation);
 				}else{
-					screen.render(x, y, 0, 0, spriteWidth, spriteHeight, 4, "green");
+					screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 				}
 			}else if(doorColor.equals("yellow")){
 				if(animationData == null) animationData = animation.loadAnimationDataRectangle(screen, "yellow", 4, 4, xTile, yTile, spriteWidth, spriteHeight, 2, 2);
-
+				if(Data == null) Data = screen.loadData(0, 0, spriteWidth, spriteHeight, 4, "yellow");
 
 				if(manager.player != null){
 					animation.animateCollision(screen, manager.player, animationData, true, 10.0F, spriteWidth, spriteHeight, x, y, 68, (spriteHeight * 64), 76, 312, 3, interpolation);
 				}else{
-					screen.render(x, y, 0, 0, spriteWidth, spriteHeight, 4, "yellow");
+					screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 				}
 			}
 		}else{
 			
 			if(doorColor.equals("orange")){
-				screen.render(x, y, xTile, yTile, spriteWidth, spriteHeight, 4, "shipIcons");
+				if(Data == null) Data = screen.loadData(xTile, yTile, spriteWidth, spriteHeight, 4, "shipIcons");
+				screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 			}else if(doorColor.equals("purple")){
-				screen.render(x, y, xTile, yTile, spriteWidth, spriteHeight, 4, "shipIcons");
+				if(Data == null) Data = screen.loadData(xTile, yTile, spriteWidth, spriteHeight, 4, "shipIcons");
+				screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 			}
 		}
 		

@@ -1,7 +1,7 @@
 package com.murdermaninc.level;
 
-import com.mudermaninc.entity.Entity;
-import com.mudermaninc.entity.Player;
+import com.murdermaninc.entity.Entity;
+import com.murdermaninc.entity.Player;
 import com.murdermaninc.blocks.*;
 import com.murdermaninc.decorations.*;
 import com.murdermaninc.decorations.artifacts.*;
@@ -45,7 +45,7 @@ public class Level {
 		levelHeight = LevelD.getLevelHeight();
 		
 		//I don't know how efficient it is to create a screen that is the size of the entire level itself.
-		screen = new Screen(width, height, 0, 0, 0);
+		screen = new Screen(width, height, 0, 0);
 		
 		if(worldNumber == 1){
 			if(levelNumber > 8 && levelNumber <= 12){
@@ -198,6 +198,7 @@ public class Level {
 				if(levelData[x + y * levelWidth] == 97) Block.blocks[x + y * levelWidth] = new LeafBlock(97, x, y, 1, 8);
 				if(levelData[x + y * levelWidth] == 98) Block.blocks[x + y * levelWidth] = new LeafBlock(98, x, y, 2, 8);
 				if(levelData[x + y * levelWidth] == 99) Block.blocks[x + y * levelWidth] = new LeafBlock(99, x, y, 3, 8);
+				if(levelData[x + y * levelWidth] == 100) Block.blocks[x + y * levelWidth] = new AirCollisionBlock(100, x, y);
 				
 			}
 		}
@@ -247,22 +248,22 @@ public class Level {
 			if(decorationData[i] == 2015) Decoration.decorations.add(new Decoration(2015, currentX, currentY, 8, 2, 1, 1, 1)); //RegularVineFlower 105 - 2010
 			if(decorationData[i] == 2016) Decoration.decorations.add(new DeadlyDecoration(2016, currentX, currentY, 8, 3, 1, 1, 1, "deflat", 0, 0, 0, 0)); //TransitionVine 105 - 2010
 			if(decorationData[i] == 2017) Decoration.decorations.add(new LumenFlower(2017, currentX, currentY, 10, 4, 1, 1, 1)); // 101 - 2006
-			if(decorationData[i] == 2018) Decoration.decorations.add(new Water(2018, currentX, currentY, 0, 10, 1, 1, 1, "deflat", 0, 0, 2, 0, "stand"));
-			if(decorationData[i] == 2019) Decoration.decorations.add(new Water(2019, currentX, currentY, 1, 10, 1, 1, 1, "deflat", 0, 0, 2, 0, "horiFlowRight"));
-			if(decorationData[i] == 2020) Decoration.decorations.add(new Water(2020, currentX, currentY, 2, 10, 1, 1, 1, "deflat", 0, 0, 2, 0, "horiFlowRight"));
-			if(decorationData[i] == 2021) Decoration.decorations.add(new Water(2021, currentX, currentY, 3, 10, 1, 1, 1, "deflat", 0, 0, 2, 0, "horiFlowRight"));
-			if(decorationData[i] == 2022) Decoration.decorations.add(new Water(2022, currentX, currentY, 4, 10, 1, 1, 1, "deflat", 0, 0, 2, 0, "horiFlowRight"));
-			if(decorationData[i] == 2023) Decoration.decorations.add(new Water(2023, currentX, currentY, 5, 10, 1, 1, 1, "deflat", 0, 0, 2, 0, "horiFlowRight"));
-			if(decorationData[i] == 2024) Decoration.decorations.add(new Water(2024, currentX, currentY, 6, 10, 1, 1, 1, "deflat", 0, 0, 2, 0, "horiFlowRight"));
-			if(decorationData[i] == 2025) Decoration.decorations.add(new Water(2025, currentX, currentY, 7, 10, 1, 1, 1, "deflat", 0, 0, 2, 0, "horiFlowRight"));
-			if(decorationData[i] == 2026) Decoration.decorations.add(new Water(2026, currentX, currentY, 8, 10, 1, 1, 1, "deflat", 0, 0, 0, 0, "vertFlow"));
-			if(decorationData[i] == 2027) Decoration.decorations.add(new Water(2027, currentX, currentY, 1, 11, 1, 1, 1, "deflat", 0, 0, 2, 0, "horiFlowLeft"));
-			if(decorationData[i] == 2028) Decoration.decorations.add(new Water(2028, currentX, currentY, 2, 11, 1, 1, 1, "deflat", 0, 0, 2, 0, "horiFlowLeft"));
-			if(decorationData[i] == 2029) Decoration.decorations.add(new Water(2029, currentX, currentY, 3, 11, 1, 1, 1, "deflat", 0, 0, 2, 0, "horiFlowLeft"));
-			if(decorationData[i] == 2030) Decoration.decorations.add(new Water(2030, currentX, currentY, 4, 11, 1, 1, 1, "deflat", 0, 0, 2, 0, "horiFlowLeft"));
-			if(decorationData[i] == 2031) Decoration.decorations.add(new Water(2031, currentX, currentY, 5, 11, 1, 1, 1, "deflat", 0, 0, 2, 0, "horiFlowLeft"));
-			if(decorationData[i] == 2032) Decoration.decorations.add(new Water(2032, currentX, currentY, 6, 11, 1, 1, 1, "deflat", 0, 0, 2, 0, "horiFlowLeft"));
-			if(decorationData[i] == 2033) Decoration.decorations.add(new Water(2033, currentX, currentY, 7, 11, 1, 1, 1, "deflat", 0, 0, 2, 0, "horiFlowLeft"));
+			if(decorationData[i] == 2018) Decoration.decorations.add(new Water(2018, currentX, currentY, 0, 10, 1, 1, 1, "drown", 0, 0, 2, 0, "stand"));
+			if(decorationData[i] == 2019) Decoration.decorations.add(new Water(2019, currentX, currentY, 1, 10, 1, 1, 1, "disolve", 0, 0, 2, 0, "horiFlowRight"));
+			if(decorationData[i] == 2020) Decoration.decorations.add(new Water(2020, currentX, currentY, 2, 10, 1, 1, 1, "disolve", 0, 0, 2, 0, "horiFlowRight"));
+			if(decorationData[i] == 2021) Decoration.decorations.add(new Water(2021, currentX, currentY, 3, 10, 1, 1, 1, "disolve", 0, 0, 2, 0, "horiFlowRight"));
+			if(decorationData[i] == 2022) Decoration.decorations.add(new Water(2022, currentX, currentY, 4, 10, 1, 1, 1, "disolve", 0, 0, 2, 0, "horiFlowRight"));
+			if(decorationData[i] == 2023) Decoration.decorations.add(new Water(2023, currentX, currentY, 5, 10, 1, 1, 1, "disolve", 0, 0, 2, 0, "horiFlowRight"));
+			if(decorationData[i] == 2024) Decoration.decorations.add(new Water(2024, currentX, currentY, 6, 10, 1, 1, 1, "disolve", 0, 0, 2, 0, "horiFlowRight"));
+			if(decorationData[i] == 2025) Decoration.decorations.add(new Water(2025, currentX, currentY, 7, 10, 1, 1, 1, "disolve", 0, 0, 2, 0, "horiFlowRight"));
+			if(decorationData[i] == 2026) Decoration.decorations.add(new Water(2026, currentX, currentY, 8, 10, 1, 1, 1, "disolve", 0, 0, 0, 0, "vertFlow"));
+			if(decorationData[i] == 2027) Decoration.decorations.add(new Water(2027, currentX, currentY, 1, 11, 1, 1, 1, "disolve", 0, 0, 2, 0, "horiFlowLeft"));
+			if(decorationData[i] == 2028) Decoration.decorations.add(new Water(2028, currentX, currentY, 2, 11, 1, 1, 1, "disolve", 0, 0, 2, 0, "horiFlowLeft"));
+			if(decorationData[i] == 2029) Decoration.decorations.add(new Water(2029, currentX, currentY, 3, 11, 1, 1, 1, "disolve", 0, 0, 2, 0, "horiFlowLeft"));
+			if(decorationData[i] == 2030) Decoration.decorations.add(new Water(2030, currentX, currentY, 4, 11, 1, 1, 1, "disolve", 0, 0, 2, 0, "horiFlowLeft"));
+			if(decorationData[i] == 2031) Decoration.decorations.add(new Water(2031, currentX, currentY, 5, 11, 1, 1, 1, "disolve", 0, 0, 2, 0, "horiFlowLeft"));
+			if(decorationData[i] == 2032) Decoration.decorations.add(new Water(2032, currentX, currentY, 6, 11, 1, 1, 1, "disolve", 0, 0, 2, 0, "horiFlowLeft"));
+			if(decorationData[i] == 2033) Decoration.decorations.add(new Water(2033, currentX, currentY, 7, 11, 1, 1, 1, "disolve", 0, 0, 2, 0, "horiFlowLeft"));
 			if(decorationData[i] == 2034) Decoration.decorations.add(new WaterBehind(2034, currentX, currentY, 1, 12, 1, 1, 3));
 			if(decorationData[i] == 2035) Decoration.decorations.add(new Decoration(2035, currentX, currentY, 3, 15, 3, 3, 1));
 			if(decorationData[i] == 2036) Decoration.decorations.add(new Decoration(2036, currentX, currentY, 6, 15, 2, 3, 1));
@@ -288,6 +289,13 @@ public class Level {
 			if(decorationData[i] == 2056) Decoration.decorations.add(new DeadlyDecoration(2056, currentX, currentY, 3, 5, 1, 1, 1, "poison", 0, 1, 5, 0));
 			if(decorationData[i] == 2057) Decoration.decorations.add(new Decoration(2057, currentX, currentY, 0, 11, 2, 1, 2));
 			if(decorationData[i] == 2058) Decoration.decorations.add(new VerticalClimableVine(2058, currentX, currentY, 4, 6, 1, 8, 3));
+			if(decorationData[i] == 2059) Decoration.decorations.add(new Decoration(2059, currentX, currentY, 0, 20, 3, 4, 1));
+			if(decorationData[i] == 2060) Decoration.decorations.add(new Decoration(2060, currentX, currentY, 3, 20, 3, 4, 1));
+			if(decorationData[i] == 2061) Decoration.decorations.add(new Decoration(2061, currentX, currentY, 6, 20, 3, 4, 1));
+			if(decorationData[i] == 2062) Decoration.decorations.add(new DeadlyDecoration(2062, currentX, currentY, 4, 5, 1, 1, 1, "poison", 0, 1, 5, 0));
+			if(decorationData[i] == 2063) Decoration.decorations.add(new Decoration(2063, currentX, currentY, 5, 6, 1, 1, 1));
+			if(decorationData[i] == 2064) Decoration.decorations.add(new BugTree(2064, currentX, currentY, 10, 18, 5, 6, 1));
+			//if(decorationData[i] == 2065) Decoration.decorations.add(new BugTree(2065, currentX, currentY, 10, 18));
 			
 			//Artifact ID's    2750 - 3000
 			
@@ -656,10 +664,9 @@ public class Level {
 	public Player setPlayer(InputManager input){
 		for(int i = 0; i < Decoration.decorations.size(); i++){
 			if(Decoration.decorations.get(i).id == 2000){
-				Player player =  new Player("Player", input, this, Decoration.decorations.get(i).x + (17 * 4), Decoration.decorations.get(i).y + (15 * 4));
-				if(levelNumber > 8 && levelNumber <= 12){
-					player.setDarkOffset(6);
-				}
+				Player player =  new Player(0, 0, 0, 1, 1, "Player", input, this, Decoration.decorations.get(i).x + (17 * 4), Decoration.decorations.get(i).y + (15 * 4));
+				//Player player =  new Player("Player", input, this, 1288, 2831);// 2831
+				//Player player =  new Player("Player", input, this, 5880, 331);// 2831
 				return player;
 			}
 		}
@@ -672,7 +679,7 @@ public class Level {
 		}
 		
 		for(int i = 0; i < Entity.entities.size(); i++){
-			Entity.entities.get(i).tick(this);
+			Entity.entities.get(i).tick(this, player);
 			if(deletedEntity){
 				deletedEntity = false;
 				i--;
@@ -682,7 +689,7 @@ public class Level {
 	
 	//Main render area for the current level to be rendered
 	
-	public void render(float interpolation, float testInterpolation){
+	public void render(float interpolation){
 
 		
 		for(int i = 0; i < Decoration.decorations.size(); i++){
@@ -698,17 +705,16 @@ public class Level {
 			}
 		}
 		
-		
 		//DONE Add Ability to render decorations before the blocks
 		
 		for(int i = 0; i < Decoration.decorations.size(); i++){
-			if(Decoration.decorations.get(i).render == 1){
+			if(Decoration.decorations.get(i).render == 1 ){
 				Decoration.decorations.get(i).render(screen, interpolation);
 			}
 		}
 		
 		for(int i = 0; i < Entity.entities.size(); i++){
-			Entity.entities.get(i).render(screen, interpolation, testInterpolation);
+			Entity.entities.get(i).render(screen, interpolation);
 		}
 		artifactBar.render(screen, subArtifactsXYTiles);
 		
@@ -717,7 +723,7 @@ public class Level {
 		
 	}
 	
-	public void renderBeforePlayer(Screen screen, float interpolation){
+	public void renderBeforePlayer(Screen screen, float interpolation) {
 		for(int i = 0; i < Decoration.decorations.size(); i++){
 			if(Decoration.decorations.get(i).render == 3){
 				Decoration.decorations.get(i).render(screen, interpolation);
@@ -741,6 +747,8 @@ public class Level {
 	
 	
 	public Block getBlock(int x, int y){
+		//System.out.println("X Block Value: " + x);
+		//System.out.println("Y Block Value: " + y);
 		if(y < levelHeight && x < levelWidth && x >= 0 && y >= 0){
 			
 			int i = x + y * levelWidth;
@@ -750,6 +758,16 @@ public class Level {
 
 
 		}else{
+			
+			if(x >= 0 && y < 0) {
+				if(Block.blocks[x].collisions && Block.blocks[x].Data[0] != -1086453 && Block.blocks[x].Data[63] != -1086453) {
+					AirBlock airCollisions = new AirBlock(0, x, y);
+					airCollisions.collisions = true;
+					
+					return airCollisions;
+				}
+			}
+			
 			return new AirBlock(0, x, y);
 		}
 		
@@ -764,6 +782,44 @@ public class Level {
 		}
 		
 		return null;
+	}
+	
+	public boolean containsDecorations(int[] decorationIds) {
+		
+		for(int i = 0; i < decorationIds.length; i++) {
+			for(int j = 0; j < Decoration.decorations.size(); j++){
+				if(Decoration.decorations.get(j).id == decorationIds[i]){
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	public boolean containsDeathTag(String getTag) {
+		
+		for(int i = 0; i < Decoration.decorations.size(); i++) {
+			if(Decoration.decorations.get(i) instanceof DeadlyDecoration) {
+				if(((DeadlyDecoration)Decoration.decorations.get(i)).deathTag.equals(getTag)) {
+					return true;
+ 				}
+			}
+		}
+		
+		
+		return false;
+		
+	}
+	
+	public boolean isDarkened() {
+		
+		if(this.worldNumber == 1 && this.levelNumber >= 9 && this.levelNumber <= 12) {
+			return true;
+		}
+		
+		
+		return false;
 	}
 	
 	public boolean touchingArtifact(int playerX, int playerXR, int playerY, int playerYB){

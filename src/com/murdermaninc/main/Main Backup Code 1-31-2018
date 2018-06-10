@@ -1,11 +1,10 @@
-
 package com.murdermaninc.main;
 
+import java.awt.BufferCapabilities;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.DisplayMode;
-import java.awt.EventQueue;
-import java.awt.Frame;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
@@ -15,13 +14,18 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.awt.image.VolatileImage;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
+import java.io.PrintStream;
 
-import com.murdermaninc.entity.Player;
+import javax.swing.JFrame;
+
+import com.mudermaninc.entity.Player;
 import com.murdermaninc.collectionBackground.CollectionBackground;
 import com.murdermaninc.graphics.Animation;
 import com.murdermaninc.graphics.BackgroundManager;
@@ -34,9 +38,15 @@ import com.murdermaninc.pauseMenu.PauseMenu;
 
 
 
-public class Main implements Runnable{
+public class Main{
 	
 	
+	/*
+	 * 
+	 * FINAL FPS GOAL: 100 FPS MINIMUM!!!
+	 * 
+	 * 
+	 */
 	
 	
 	Dimension ScreenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -44,6 +54,8 @@ public class Main implements Runnable{
     public final int screenHeight = (int) ScreenSize.getHeight();
 	public final int width = 1920;
 	public final int height = 1080;
+	
+    private VolatileImage volatileRGB;
 	
 	private boolean running = false;
 	
@@ -78,221 +90,248 @@ public class Main implements Runnable{
 	int frames = 0;
 	boolean countFPS = false;
 	
-	public boolean skipRender = false;
-	
-	Frame mainFrame;
+	JFrame mainFrame;
 	
 	ImageCapabilities vcap;
+	
+	public Main(GraphicsDevice gd){
+		try{
+			GraphicsConfiguration gc = gd.getDefaultConfiguration();
+			
+			mainFrame = new JFrame(gc);
+			mainFrame.setIgnoreRepaint(true);
+			mainFrame.setFocusable(true);
+			
+			//set Cursor to blank
+			BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
 
-	public Main() throws InvocationTargetException, InterruptedException {
-		
-		java.awt.EventQueue.invokeAndWait(new Runnable() {
-			public void run() {
-				GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-				GraphicsDevice gd = ge.getDefaultScreenDevice();
+			Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0), "blank cursor");
+			
+			mainFrame.setCursor(blankCursor);
+			
+			gd.setFullScreenWindow(mainFrame);
+			if(gd.isDisplayChangeSupported()){
+				chooseBestDisplayMode(gd);
+			}
+			
 
-				try{
+			try {
+				
+				PrintStream out = new PrintStream(new FileOutputStream("ConsoleOutput.txt"));		
+				System.setOut(out);
+				
+			} catch (FileNotFoundException e1) {
+				e1.printStackTrace();
+			}
+
+			
+			init();
+			
+			mainFrame.requestFocus();
+			
+			mainFrame.createBufferStrategy(2);
+			
+			BufferStrategy bs = mainFrame.getBufferStrategy();
+			
+			running = true;
 
 
-					GraphicsConfiguration gc = gd.getDefaultConfiguration();
+			BufferCapabilities bufferCap = getGraphicsConfiguration().getBufferCapabilities();
+			
+			Log.write("Is Full Screen Supported: " + gd.isFullScreenSupported());
+			Log.write("Get Accelerated Memory: " + gd.getAvailableAcceleratedMemory());
+			Log.write("Default Configuration: " + gd.getDefaultConfiguration().toString());
+			Log.write("Buffer Fullscreen Required: " + mainFrame.getBufferStrategy().getCapabilities().isFullScreenRequired());
+			Log.write("Buffer Multibuffer Available: " + mainFrame.getBufferStrategy().getCapabilities().isMultiBufferAvailable());
+			Log.write("Buffer Page Flipping: " + mainFrame.getBufferStrategy().getCapabilities().isPageFlipping());
+			Log.write("Is Fullscreen Required: " + bufferCap.isFullScreenRequired());
+			Log.write("Is Multibuffer Available: " + bufferCap.isMultiBufferAvailable());
+			Log.write("Is Page Flipping: " + bufferCap.isPageFlipping());
+			Log.write("Bit Depth: " + Integer.toString(getGraphicsConfiguration().getDevice().getDisplayMode().getBitDepth()));
+			Log.write("Width: " + Integer.toString(getGraphicsConfiguration().getDevice().getDisplayMode().getWidth()));
+			Log.write("Height: " + Integer.toString(getGraphicsConfiguration().getDevice().getDisplayMode().getHeight()));
+			Log.write("Refresh Rate: " + Integer.toString(getGraphicsConfiguration().getDevice().getDisplayMode().getRefreshRate()));
+			Log.write("Graphics Configuration: " + getGraphicsConfiguration().toString());
+			
+			int idealFPS = 60;
+			long updatePerTick = 1000000000 / idealFPS;
 
-					mainFrame = new Frame(gc);
-					mainFrame.setUndecorated(true);
-					mainFrame.setIgnoreRepaint(true);
+			long lastTime = System.nanoTime();
+			int lastSecondTime = (int) (lastTime / 1000000000);
 
-					//set Cursor to blank
-					BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+			boolean shouldRender = false;
+			
+			int maxUpdatesPerTick = 0;
 
-					Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0), "blank cursor");
+			int frames = 0;
+			int ticks = 0;
+			
+			long lastFrame = System.nanoTime();
 
-					mainFrame.setCursor(blankCursor);
+			while(running){
 
-					gd.setFullScreenWindow(mainFrame);
-					if(gd.isDisplayChangeSupported()){
-						chooseBestDisplayMode(gd);
-					}
+				long now = System.nanoTime();
+				
+				//frameTime = now - lastTime;
 
-					mainFrame.createBufferStrategy(2);
-
-				}catch(Exception e){
-
-					gd.setFullScreenWindow(null);
+				while(now - lastTime > updatePerTick && maxUpdatesPerTick < 10){
+					tick();
+					lastTime += updatePerTick;
+					maxUpdatesPerTick++;
+					ticks++;
+					shouldRender = true;
 				}
 
-				System.out.println("Event Queue: " + EventQueue.isDispatchThread());
-			}
-		});
-		
-		new Thread(this).start();
-		
 
-	}
+				if(shouldRender){
 
-	public void run(){
-
-		System.out.println("Event Queue: " + EventQueue.isDispatchThread());
-		
-		
-		init();
-
-		BufferStrategy bs = mainFrame.getBufferStrategy();
-
-		running = true;
-
-
-		int idealFPS = 60;
-		long updatePerTick = 1000000000 / idealFPS;
-
-		long lastTime = System.nanoTime();
-		int lastSecondTime = (int) (lastTime / 1000000000);
-
-		boolean shouldRender = false;
-
-		int maxUpdatesPerTick = 0;
-
-		int frames = 0;
-		int ticks = 0;
-
-		long lastFrame = System.nanoTime();
-
-		while(running){
-
-			long now = System.nanoTime();
-
-			//frameTime = now - lastTime;
-
-			while(now - lastTime > updatePerTick && maxUpdatesPerTick < 10){
-				tick();
-				lastTime += updatePerTick;
-				maxUpdatesPerTick++;
-				ticks++;
-				shouldRender = true;
-			}
-
-
-			if(shouldRender){
-
-				long renderCycle = System.nanoTime();
-
-				maxUpdatesPerTick = 0;
-
-				float interpolation = (float) (System.nanoTime() - lastFrame) / updatePerTick;
-				lastFrame = System.nanoTime();
-
-				long renderMethod = System.nanoTime();
-
-				render(interpolation);
-
-				Benchmark.addBenchmarkFloat("Entire Render Method:", (System.nanoTime() - renderMethod) / 1_000_000F);
-				try {
-					java.awt.EventQueue.invokeAndWait(new Runnable() {
-						public void run() {
-							Graphics2D g = (Graphics2D) bs.getDrawGraphics();
-
-							if (!bs.contentsLost()) {
-								if(input.test){
-									Benchmark.calculateAndStoreAverage();
-									System.exit(0);
-								}
-								if(!mainShipWorld){
-
-									//drawing for the level
-
-									//drawing for the mother ship
-									if(screenWidth != 1920 || screenHeight != 1080) {
-
-										long drawImage = System.nanoTime();
-
-										g.drawImage(screenTiles.image, 0, 0, screenWidth, screenHeight, null);
-										//g.drawImage(screenTiles.solidColors, 0, 0, screenWidth, screenHeight, null);
-										//g.drawImage(screenTiles.image, (2560 - 1920) / 2, (1440 - 1080) / 2, null);
-
-										Benchmark.addBenchmarkFloat("Draw Image:", (System.nanoTime() - drawImage) / 1_000_000F);
-
-
-
-									}else {
-
-										g.drawImage(screenTiles.solidColors, 0, 0, null);
-										g.drawImage(screenTiles.image, 0, 0, null);
-
-									}
-
-
-								}else{
-
-									//drawing for the mother ship
-									if(screenWidth != 1920 || screenHeight != 1080) {
-
-										g.drawImage(screenShip.image, 0, 0, screenWidth, screenHeight, null);
-
-									}else {
-
-										g.drawImage(screenShip.image, 0, 0, null);
-
-									}
-
-								}
-
-								long bsShow = System.nanoTime();
-
-								bs.show();
-
-								Benchmark.addBenchmarkFloat("Bs.show:", (System.nanoTime() - bsShow) / 1_000_000F);
-
-								//Log.write("++++++Buffer Lost Contents: " + Boolean.toString(bs.contentsLost()));
-
-
-								g.dispose();
-
-							}
+					long renderTime = System.nanoTime();
+					
+					maxUpdatesPerTick = 0;
+					
+					float interpolation = (float) (System.nanoTime() - lastFrame) / updatePerTick;
+					lastFrame = System.nanoTime();
+					
+					render(interpolation);
+					
+					
+					
+					Graphics g = bs.getDrawGraphics();
+					
+					if (!bs.contentsLost()) {
+						if(input.test){
+							idealFPS = 1;
+							updatePerTick = 1000000000 / idealFPS;
 						}
-					});
-				} catch (InvocationTargetException | InterruptedException e) {
-					Log.write("Frame missed it's rendering!!!");
+						if(!mainShipWorld){
+							
+							//drawing for the level
+
+							//drawing for the mother ship
+							do {
+								int returnCode = volatileRGB.validate(getGraphicsConfiguration());
+								
+			
+								if (returnCode == VolatileImage.IMAGE_RESTORED) renderVolatileRGB(1);     	
+								
+								vcap = volatileRGB.getCapabilities();
+								
+								if(bs.getCapabilities().isPageFlipping()) {
+									
+									g.drawImage(volatileRGB, 0, 0, null);
+									
+								}else {
+									//if(screenWidth != width || screenHeight != height) {
+										///g.drawImage(screenTiles.image, 0, 0, screenWidth, screenHeight, null);
+									//}else {
+										//g.drawImage(screenTiles.image, 0, 0, null);
+									//}
+								}
+								
+								Log.write("Is Accelerated: " + String.valueOf(vcap.isAccelerated()));
+								Log.write("Is True Volatile: " + String.valueOf(vcap.isTrueVolatile()));
+
+							} while (volatileRGB.contentsLost());
+							
+							volatileRGB.flush();
+								
+
+						}else{
+							
+							//drawing for the mother ship
+							do {
+								int returnCode = volatileRGB.validate(getGraphicsConfiguration());
+								
+								Log.write("Return Code: " + returnCode);
+			
+								if (returnCode == VolatileImage.IMAGE_RESTORED) renderVolatileRGB(2);     	
+								
+								vcap = volatileRGB.getCapabilities();
+								
+								g.drawImage(volatileRGB, 0, 0, null);
+								
+								Log.write("Is Accelerated: " + String.valueOf(vcap.isAccelerated()));
+								Log.write("Is True Volatile: " + String.valueOf(vcap.isTrueVolatile()));
+
+							} while (volatileRGB.contentsLost());
+							
+							volatileRGB.flush();
+							
+						}
+						
+						Log.write("|||Render Time (ms): " + Float.toString((System.nanoTime() - renderTime) / 1_000_000F));
+
+						long screenRender = System.nanoTime();
+						
+						bs.show();
+						
+						//Log.write("++++++Buffer Lost Contents: " + Boolean.toString(bs.contentsLost()));
+						
+						Log.write("|||Drawing to Screen (ms): " + Float.toString(((System.nanoTime() - screenRender) / 1_000_000F)));	
+						
+						g.dispose();
+						
+					}
+					
+					frames++;
+					shouldRender = false;
+					
+					
 				}
 
-				frames++;
-				shouldRender = false;
+
+				int thisSecond = (int) (lastTime / 1000000000);
+				if (thisSecond > lastSecondTime)
+				{
+
+					System.out.println("Frames: " + frames + " Ticks: " + ticks);
+					this.ticks = ticks;
+					this.frames = frames;
+					frames = 0;
+					ticks = 0;
+					countFPS = true;
+					lastSecondTime = thisSecond;
+
+				}
 
 
-				Benchmark.addBenchmarkFloat("Entire Render Cycle:", (System.nanoTime() - renderCycle) / 1_000_000F);
+				while(now - lastTime < updatePerTick){
 
+					Thread.yield();
+
+					try {
+						Thread.sleep(1);
+					}catch(Exception e) {
+						e.printStackTrace();
+					} 
+
+					now = System.nanoTime();
+				}
 			}
 
-
-			int thisSecond = (int) (lastTime / 1000000000);
-			if (thisSecond > lastSecondTime)
-			{
-
-				System.out.println("Frames: " + frames + " Ticks: " + ticks);
-				this.ticks = ticks;
-				this.frames = frames;
-				frames = 0;
-				ticks = 0;
-				countFPS = true;
-				lastSecondTime = thisSecond;
-
-			}
-
-
-			while(now - lastTime < updatePerTick){
-
-				Thread.yield();
-
-				try {
-					Thread.sleep(1);
-				}catch(Exception e) {
-					e.printStackTrace();
-				} 
-
-				now = System.nanoTime();
-			}
+		}finally{
+			gd.setFullScreenWindow(null);
 		}
-		
 
 	}
 	
+	private GraphicsConfiguration getGraphicsConfiguration() {
+    	GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    	GraphicsConfiguration gc = ge.getDefaultScreenDevice().getDefaultConfiguration();
+    	return gc;
+	}
+	
+	private void renderVolatileRGB(int screenSelect) {
+	      do {
+
+	          Graphics2D g = volatileRGB.createGraphics();    
+	          
+	          if(screenSelect == 1) g.drawImage(screenTiles.image, 0, 0, screenWidth, screenHeight, null);
+	          if(screenSelect == 2) g.drawImage(screenShip.image, 0, 0, screenWidth, screenHeight, null);
+	          
+	          g.dispose();
+	      } while (volatileRGB.contentsLost());
+	}
 
 
 	
@@ -315,6 +354,13 @@ public class Main implements Runnable{
 			ie.printStackTrace();
 		}
 		
+		volatileRGB = getGraphicsConfiguration().createCompatibleVolatileImage(screenWidth, screenHeight);
+		
+		Log.write("Volatile Accelerated: " + Boolean.toString(volatileRGB.getCapabilities().isAccelerated()));
+		Log.write("Volatile Ture Volatile: " + Boolean.toString(volatileRGB.getCapabilities().isTrueVolatile()));
+		Log.write("Acceleration Priority: " + Float.toString(volatileRGB.getAccelerationPriority()));
+		Log.write("Volatile Height: " + Integer.toString(volatileRGB.getHeight()));
+		Log.write("Volatile Width: " + Integer.toString(volatileRGB.getWidth()));
 		
 		levelSequence.loadLevelSequence();
 		input = new InputManager(mainFrame);
@@ -336,8 +382,6 @@ public class Main implements Runnable{
 	
 	private void tick(){
 		
-		if(skipRender) skipRender = false;
-		
 		tickCount++;
 		
 		if(input.escape && !artifactMenu){
@@ -354,11 +398,11 @@ public class Main implements Runnable{
 			
 				if(input.r){
 					input.r = false;
-					loadLevel("Level2-1", 1, 2);
+					loadLevel("Level1-1", 1, 1);
 				}
 
 				if(level == null){
-					loadLevel("Level1-13", 13, 1);
+					loadLevel("Level1-1", 1, 1);
 
 				}
 
@@ -493,7 +537,6 @@ public class Main implements Runnable{
 	
 	
 	private void render(float interpolation){ 
-
 		
 		//System.out.println("Interpolation: " + interpolation);
 		
@@ -504,7 +547,7 @@ public class Main implements Runnable{
 		//Be wary of this becuase if 0.9 becomes the new constant
 		//then all the animations will be running at 60 / 0.9
 		
-		/*if(interpolation != constInterpolation && !(interpolation >= constInterpolation - deviation && interpolation <= constInterpolation + deviation)) {
+		if(interpolation != constInterpolation && !(interpolation >= constInterpolation - deviation && interpolation <= constInterpolation + deviation)) {
 			
 			//System.out.println("Deviated from standard");
 			//Log.write("++++++Deviated from standard: " + Float.toString(interpolation));
@@ -526,29 +569,52 @@ public class Main implements Runnable{
 			}
 		}else {
 			deviationCounter = 0;
-		}*/
+		}
 		
 		interpolation = 1.0F;
 		
-		if(skipRender) return;
+		/*if(countFPS) {
+			if(fpsTimer == 3) {
+				int sum = 0;
+				for(int i = 0; i < fpsCounting.length; i++) {
+					sum += fpsCounting[i];
+				}
+				Animation.lastGameFPS = Animation.gameFPS;
+				Animation.gameFPS = (int) ((float) sum / fpsCounting.length);
+				Animation.updateCounter = true;
+				animationUpdate = true;
+				fpsTimer = 0;
+			}
+			fpsCounting[fpsTimer] = frames;
+			countFPS = false;
+			fpsTimer++;
+		}*/
+		
+		/*if(countFPS) {
+			
+			if(Animation.gameFPS != frames) {
+				
+				System.out.println("Updating FPS");
+				Animation.lastGameFPS = Animation.gameFPS;
+				Animation.gameFPS = frames;
+				Animation.updateCounter = true;
+				animationUpdate = true;
+			}
+			countFPS = false;
+		}*/
+		
+
 		
 		if(!artifactMenu && !mainShipWorld && !pauseMenu){		
 			
-			screenTiles.totalLoops = 0;
-			
 			//RENDER FOR LEVEL
-			//long BackgroundRender = System.nanoTime();
 			
 			if(backgroundManager != null){
 				backgroundManager.render(screenTiles, interpolation);
 			}
 			
-			//Log.write("|||Background Render: " + ((System.nanoTime() - BackgroundRender) / 1_000_000F));
-			
-			long EverythingRender = System.nanoTime();
-			
 			if(player!=null) {
-				player.renderBeforeAllDecorations(screenTiles, interpolation);
+				player.renderBeforeAllDecorations(screenTiles);
 			}
 		
 			if(level != null){
@@ -562,12 +628,6 @@ public class Main implements Runnable{
 			if(level != null){
 				level.render(interpolation);
 			}
-
-			
-			Benchmark.addBenchmarkFloat("Blocks, Dec, Enti:", (System.nanoTime() - EverythingRender) / 1_000_000F);
-			
-			
-			Benchmark.addBenchmarkLong("Total Loops:", (long) screenTiles.totalLoops);
 
 		}
 		
@@ -592,12 +652,10 @@ public class Main implements Runnable{
 			//RENDER FOR MAIN SHIP
 			
 			if(mainShipManager == null){
-				System.out.println("Testing2");
 				mainShipManager = new MainShipWorldManager(this, loadShip, loadLevelNumber, input, width, height);
 				screenShip = mainShipManager.getScreen();
 			}
 			
-			System.out.println("Render Ship");
 			
 			mainShipManager.render(screenShip, interpolation);
 			
@@ -647,18 +705,9 @@ public class Main implements Runnable{
 		screenTiles = level.getScreen();
 		player = level.setPlayer(input);
 		player.noControl = true;
-		skipRender = true;
 
 		backgroundManager = new BackgroundManager(levelNumber, worldNumber, width, height, screenTiles, level);
 		
-	}
-	
-	public void reset() {
-		collectionBackground = null;
-		mainShipManager = null;
-		screenShip = null;
-		artifactMenu = false;
-		mainShipWorld = false;
 	}
 	
 	public int[] getCurrentWorldAndLevel(){
@@ -690,52 +739,42 @@ public class Main implements Runnable{
 	
 	
 	//Sets the display mode !!!REMEMBER TO ADD MORE!!!
-	private DisplayMode[] bestDisplayModes = {
-			new DisplayMode(2560, 1440, 32, 0), 
-			new DisplayMode(1920, 1080, 32, 0), 
-			new DisplayMode(1600, 900, 32, 0), 
-			new DisplayMode(1366, 768, 32, 0) };
-
-	private DisplayMode getBestDisplayMode(GraphicsDevice gd)
-	{
-		for (int i = 0; i < bestDisplayModes.length; i++)
-		{
+	private DisplayMode[] bestDisplayModes = new DisplayMode[]{
+			new DisplayMode(2560, 1440, 32, 0),
+			new DisplayMode(1920, 1080, 32, 0),
+			new DisplayMode(1600, 900, 32, 0),
+			new DisplayMode(1366, 768, 32, 0)
+		};
+	
+	private DisplayMode getBestDisplayMode(GraphicsDevice gd){
+		for(int i = 0; i < bestDisplayModes.length; i++){
 			DisplayMode[] modes = gd.getDisplayModes();
-			for (int j = 0; j < modes.length; j++) {
-				if ((modes[j].getHeight() == bestDisplayModes[i].getHeight()) && 
-						(modes[j].getWidth() == bestDisplayModes[i].getWidth()) && 
-						(modes[j].getBitDepth() == bestDisplayModes[i].getBitDepth())) {
-					return bestDisplayModes[i];
+			for(int j = 0; j < modes.length; j++){
+				if(modes[j].getHeight() == bestDisplayModes[i].getHeight() &&
+					modes[j].getWidth() == bestDisplayModes[i].getWidth() &&
+					modes[j].getBitDepth() == bestDisplayModes[i].getBitDepth()){
+					Log.write("Refresh Rate For Mode: " + modes[j].getRefreshRate());
+					Log.write("Refresh Rate for Displays: " + bestDisplayModes[i].getRefreshRate());
+					return modes[j];
 				}
 			}
 		}
 		return null;
 	}
-
-	private void chooseBestDisplayMode(GraphicsDevice gd)
-	{
+	
+	private void chooseBestDisplayMode(GraphicsDevice gd){
 		DisplayMode display = getBestDisplayMode(gd);
-		if (display != null) {
+		if(display != null){
 			gd.setDisplayMode(display);
-		} else {
+		}else{
 			gd.setDisplayMode(gd.getDisplayMode());
 		}
 	}
-
-	public static void main(String[] args)
-	{
-		
-		System.out.println("Event Queue: " + EventQueue.isDispatchThread());
-		
-		try {
-			new Main();
-		} catch (InvocationTargetException | InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+	
+	public static void main(String[] args){
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice gd = ge.getDefaultScreenDevice();
+		new Main(gd);
 	}
-
-
 }
 

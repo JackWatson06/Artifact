@@ -35,6 +35,8 @@ public class LevelData {
 						while(lineNumber.readLine() != null){
 							totalLines++;
 						}
+						//System.out.println(levelName);
+						
 						for(int i = 0; i < totalLines; i++){
 							if(br.readLine().equals(levelName)){
 								br.readLine();
@@ -43,6 +45,7 @@ public class LevelData {
 								break;
 							}
 						}
+
 						currentAmountOfSub = Integer.parseInt(br.readLine());
 						
 						if(currentAmountOfSub > 0){

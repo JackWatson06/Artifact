@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.murdermaninc.decorations.background.*;
 import com.murdermaninc.level.Level;
+import com.murdermaninc.main.Benchmark;
 
 public class BackgroundManager {
 
@@ -20,9 +21,11 @@ public class BackgroundManager {
 	public ArrayList<DecorationsBackground> decorationsBackground = new ArrayList<DecorationsBackground>();
 	
 	//This is the list of all of the animated backgrounds one for each object that is animated(try to keep a minimum of four)
-	private int objectOneCounter = 0;
-	private int objectOneCap = 0;
 	
+	//This keeps track of an id for objects
+	private int objectOneId = 0;
+	
+	private int objectOneCap = 0;
 	private int objectTwoCap = 0;
 	
 	private boolean deletedObject = false;
@@ -109,7 +112,7 @@ public class BackgroundManager {
 				
 				screen.loadSpriteSheet("/2.1-4 Background SpriteSheet.png", "background");
 				
-				currentBackground = new Background("/2.1-4 Background Green.png", true);
+				currentBackground = new Background("/2.1-4 Background.png", true);
 				//currentBackground = new Background("/1.1-4 Background.png", true);
 				currentBackground.scrolling = true;
 				currentBackground.scaleImage(4);
@@ -189,7 +192,7 @@ public class BackgroundManager {
 	//TODO update clouds to new animation rendering with loading data(remember each time a new cloud is created I don't want to have to load the data again every time so find a work around)
 	//Fix cloud deletion
 	long timing = System.currentTimeMillis();
-	boolean firsttime = false;
+	boolean firsttime = true;
 	
 	public void tick(Screen screen, Level level){
 		
@@ -201,9 +204,9 @@ public class BackgroundManager {
 		if(currentWorld == 1){
 			if(currentLevel >= 0 && currentLevel <= 16){
 
-				if(!firsttime){
+				if(firsttime){
 
-					int numberOfClouds = (int) (Math.random() * 3) + 1; // 1-3
+					int numberOfClouds = (int) (Math.random() * 5) + 1; // 1-3
 					int yDeviation = 50;
 
 
@@ -217,8 +220,8 @@ public class BackgroundManager {
 							}else{
 								spawnY = (int) (540 + (Math.random() * yDeviation));
 							}
-							objectOneCounter++;
-							decorationsBackground.add(new Cloud(objectOneCounter, 1, (int) (Math.random() * (level.levelWidth * 64)), spawnY + ((level.levelHeight * 64) - height), 9, 3, 0, 0, this));
+							objectOneId++;
+							decorationsBackground.add(new Cloud(objectOneId, 1, (int) (Math.random() * (level.levelWidth * 64)), spawnY + ((level.levelHeight * 64) - height), 9, 3, 0, 0, this));
 							objectOneCap++;
 						}else if(objectTwoCap <= 5){
 							int negPos = (int) (Math.random() * 2);
@@ -229,19 +232,19 @@ public class BackgroundManager {
 								spawnY = (int) (540 + (Math.random() * yDeviation));
 							}
 
-							objectOneCounter++;
-							decorationsBackground.add(new Cloud(objectOneCounter, 2, (int) (Math.random() * (level.levelWidth * 64)), spawnY + ((level.levelHeight * 64) - height) , 4, 2, 0, 3, this));
+							objectOneId++;
+							decorationsBackground.add(new Cloud(objectOneId, 2, (int) (Math.random() * (level.levelWidth * 64)), spawnY + ((level.levelHeight * 64) - height) , 4, 2, 0, 3, this));
 							objectTwoCap++;
 						}
 					}
 
 
-					firsttime = true;
+					firsttime = false;
 				}
 
 				int yDeviation = 50;
-				float randomChance = (float) Math.random();
-				if(randomChance < 0.0001 && objectOneCap <= 2){ //0.0001%
+				float randomChance = (float) Math.random() * 100F;
+				if(randomChance < 0.009F && objectOneCap <= 2){ //0.0001%
 					int negPos = (int) (Math.random() * 2);
 					int spawnY = 0;
 					if(negPos == 0){
@@ -249,12 +252,12 @@ public class BackgroundManager {
 					}else{
 						spawnY = (int) (540 + (Math.random() * yDeviation));
 					}
-					objectOneCounter++;
-					decorationsBackground.add(new Cloud(objectOneCounter, 1, (int) (level.levelWidth * 64 - (screen.screenX / 1.5)), spawnY + ((level.levelHeight * 64) - height), 9, 3, 0, 0, this));
+					objectOneId++;
+					decorationsBackground.add(new Cloud(objectOneId, 1, (int) (level.levelWidth * 64 - (screen.screenX / 1.5)), spawnY + ((level.levelHeight * 64) - height), 9, 3, 0, 0, this));
 					objectOneCap++;
 				}
 
-				if(randomChance < 0.0004 && objectTwoCap <= 5){ //0.0004%
+				if(randomChance < 00.04F && objectTwoCap <= 5){ //0.0004%
 					int negPos = (int) (Math.random() * 2);
 					int spawnY = 0;
 					if(negPos == 0){
@@ -263,8 +266,8 @@ public class BackgroundManager {
 						spawnY = (int) (540 + (Math.random() * yDeviation));
 					}
 
-					objectOneCounter++;
-					decorationsBackground.add(new Cloud(objectOneCounter, 2,(int) (level.levelWidth * 64 - (screen.screenX / 1.5)), spawnY + ((level.levelHeight * 64) - height) , 4, 2, 0, 3, this));
+					objectOneId++;
+					decorationsBackground.add(new Cloud(objectOneId, 2,(int) (level.levelWidth * 64 - (screen.screenX / 1.5)), spawnY + ((level.levelHeight * 64) - height) , 4, 2, 0, 3, this));
 					objectTwoCap++;
 				}
 
@@ -288,9 +291,15 @@ public class BackgroundManager {
 	
 	public void render(Screen screen, float interpolation){
 		if(!currentBackground.scrolling){
+			
+			long renderBackground = System.nanoTime();
+			
 			for(int i = 0; i < currentBackground.pixels.length; i++){
 				screen.pixels[i] = currentBackground.pixels[i];
 			}
+			
+			Benchmark.addBenchmarkFloat("Render Background:", (System.nanoTime() - renderBackground) / 1_000_000F);
+			
 		}else{
 			
 			
@@ -308,6 +317,18 @@ public class BackgroundManager {
 
 		}
 		
+		long renderBackgroundDecorations = System.nanoTime();
+		
+		for(int i = 0; i < decorationsBackground.size(); i++){
+			decorationsBackground.get(i).render(screen, interpolation);
+		}
+		
+		Benchmark.addBenchmarkFloat("Render Background Decorations:", (System.nanoTime() - renderBackgroundDecorations) / 1_000_000F);
+		
+	}
+	
+	public void renderDecorations(Screen screen, float interpolation) {
+		
 		for(int i = 0; i < decorationsBackground.size(); i++){
 			decorationsBackground.get(i).render(screen, interpolation);
 		}
@@ -315,6 +336,7 @@ public class BackgroundManager {
 	}
 	
 	public void destroyObject(int id){
+		
 		for(int i = 0; i < decorationsBackground.size(); i++){
 			if(decorationsBackground.get(i).id == id){
 				if(decorationsBackground.get(i).objectNumber == 1){
@@ -327,6 +349,7 @@ public class BackgroundManager {
 				i--;
 			}
 		}
+		
 	}
 	
 }

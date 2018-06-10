@@ -119,59 +119,66 @@ public class Door extends DecorationShip{
 		if(collisions && !lockDoor){
 			if(doorColor.equals("blue")){
 				if(animationData == null) animationData = animation.loadAnimationDataRectangle(screen, "blueDoor", 4, 4, xTile, yTile, spriteWidth, spriteHeight, 2, 2);
+				if(Data == null) Data = screen.loadData(0, 0, spriteWidth, spriteHeight, 4, "blueDoor");
 
 				if(manager.player != null){
 					animation.animateCollision(screen, manager.player, animationData, true, 10.0F, spriteWidth, spriteHeight, x, y, 96, (spriteHeight * 64), 52, 208, 3, interpolation);
 				}else{
-					screen.render(x, y, 0, 0, spriteWidth, spriteHeight, 4, "blueDoor");
+					screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 				}
 			}else if(doorColor.equals("black")){
 				if(animationData == null) animationData = animation.loadAnimationDataRectangle(screen, "blackDoor", 4, 4, xTile, yTile, spriteWidth, spriteHeight, 2, 2);
+				if(Data == null) Data = screen.loadData(0, 0, spriteWidth, spriteHeight, 4, "blackDoor");
 
 				if(manager.player != null){
 					animation.animateCollision(screen, manager.player, animationData, true, 10.0F, spriteWidth, spriteHeight, x, y, 96, (spriteHeight * 64), 52, 208, 3, interpolation);
 				}else{
-					screen.render(x, y, 0, 0, spriteWidth, spriteHeight, 4, "blackDoor");
+					screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 				}
 			}else if(doorColor.equals("lightgreen")){
 				if(animationData == null) animationData = animation.loadAnimationDataRectangle(screen, "lightgreenDoor", 4, 4, xTile, yTile, spriteWidth, spriteHeight, 2, 2);
+				if(Data == null) Data = screen.loadData(0, 0, spriteWidth, spriteHeight, 4, "lightgreenDoor");
 
 				if(manager.player != null){
 					animation.animateCollision(screen, manager.player, animationData, true, 10.0F, spriteWidth, spriteHeight, x, y, 96, (spriteHeight * 64), 52, 208, 3, interpolation);
 				}else{
-					screen.render(x, y, 0, 0, spriteWidth, spriteHeight, 4, "lightgreenDoor");
+					screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 				}
 			}else if(doorColor.equals("darkgreen")){
 				if(animationData == null) animationData = animation.loadAnimationDataRectangle(screen, "darkgreenDoor", 4, 4, xTile, yTile, spriteWidth, spriteHeight, 2, 2);
+				if(Data == null) Data = screen.loadData(0, 0, spriteWidth, spriteHeight, 4, "darkgreenDoor");
 
 				if(manager.player != null){
 					animation.animateCollision(screen, manager.player, animationData, true, 10.0F, spriteWidth, spriteHeight, x, y, 96, (spriteHeight * 64), 52, 208, 3, interpolation);
 				}else{
-					screen.render(x, y, 0, 0, spriteWidth, spriteHeight, 4, "darkgreenDoor");
+					screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 				}
 			}else if(doorColor.equals("white")){
 				if(animationData == null) animationData = animation.loadAnimationDataRectangle(screen, "whiteDoor", 4, 4, xTile, yTile, spriteWidth, spriteHeight, 2, 2);
+				if(Data == null) Data = screen.loadData(0, 0, spriteWidth, spriteHeight, 4, "whiteDoor");
 
 				if(manager.player != null){
 					animation.animateCollision(screen, manager.player, animationData, true, 10.0F, spriteWidth, spriteHeight, x, y, 96, (spriteHeight * 64), 52, 208, 3, interpolation);
 				}else{
-					screen.render(x, y, 0, 0, spriteWidth, spriteHeight, 4, "whiteDoor");
+					screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 				}
 			}else if(doorColor.equals("yellow")){
 				if(animationData == null) animationData = animation.loadAnimationDataRectangle(screen, "yellowDoor", 4, 4, xTile, yTile, spriteWidth, spriteHeight, 2, 2);
+				if(Data == null) Data = screen.loadData(0, 0, spriteWidth, spriteHeight, 4, "yellowDoor");
 
 				if(manager.player != null){
 					animation.animateCollision(screen, manager.player, animationData, true, 10.0F, spriteWidth, spriteHeight, x, y, 96, (spriteHeight * 64), 52, 208, 3, interpolation);
 				}else{
-					screen.render(x, y, 0, 0, spriteWidth, spriteHeight, 4, "yellowDoor");
+					screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 				}
 			}else if(doorColor.equals("grey")){
 				if(animationData == null) animationData = animation.loadAnimationDataRectangle(screen, "greyDoor", 4, 4, xTile, yTile, spriteWidth, spriteHeight, 2, 2);
+				if(Data == null) Data = screen.loadData(0, 0, spriteWidth, spriteHeight, 4, "greyDoor");
 
 				if(manager.player != null){
 					animation.animateCollision(screen, manager.player, animationData, true, 10.0F, spriteWidth, spriteHeight, x, y, 96, (spriteHeight * 64), 52, 208, 3, interpolation);
 				}else{
-					screen.render(x, y, 0, 0, spriteWidth, spriteHeight, 4, "greyDoor");
+					screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 				}
 			}
 			
@@ -180,19 +187,26 @@ public class Door extends DecorationShip{
 		}else{
 
 			if(doorColor.equals("blue")){
-				screen.render(x, y, 0, 0, spriteWidth, spriteHeight, 4, "blueDoor");
+				if(Data == null) Data = screen.loadData(0, 0, spriteWidth, spriteHeight, 4, "blueDoor");
+				screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 			}else if(doorColor.equals("black")){
-				screen.render(x, y, 0, 0, spriteWidth, spriteHeight, 4, "blackDoor");
+				if(Data == null) Data = screen.loadData(0, 0, spriteWidth, spriteHeight, 4, "blackDoor");
+				screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 			}else if(doorColor.equals("lightgreen")){
-				screen.render(x, y, 0, 0, spriteWidth, spriteHeight, 4, "lightgreenDoor");
+				if(Data == null) Data = screen.loadData(0, 0, spriteWidth, spriteHeight, 4, "lightgreenDoor");
+				screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 			}else if(doorColor.equals("darkgreen")){
-				screen.render(x, y, 0, 0, spriteWidth, spriteHeight, 4, "darkgreenDoor");
+				if(Data == null) Data = screen.loadData(0, 0, spriteWidth, spriteHeight, 4, "darkgreenDoor");
+				screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 			}else if(doorColor.equals("white")){
-				screen.render(x, y, 0, 0, spriteWidth, spriteHeight, 4, "whiteDoor");
+				if(Data == null) Data = screen.loadData(0, 0, spriteWidth, spriteHeight, 4, "whiteDoor");
+				screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 			}else if(doorColor.equals("yellow")){
-				screen.render(x, y, 0, 0, spriteWidth, spriteHeight, 4, "yellowDoor");
+				if(Data == null) Data = screen.loadData(0, 0, spriteWidth, spriteHeight, 4, "yellowDoor");
+				screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 			}else if(doorColor.equals("grey")){
-				screen.render(x, y, 0, 0, spriteWidth, spriteHeight, 4, "greyDoor");
+				if(Data == null) Data = screen.loadData(0, 0, spriteWidth, spriteHeight, 4, "greyDoor");
+				screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 			}
 			
 			

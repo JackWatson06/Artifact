@@ -15,7 +15,7 @@ public class SubArtifactCanister {
 	private boolean completeArtifact;
 	private int xTile, yTile;
 	
-	public SubArtifactCanister(int x, int y, boolean completeArtifact, int[] completedSubArtifactData){
+	public SubArtifactCanister(Screen screen, int x, int y, boolean completeArtifact, int[] completedSubArtifactData){
 		this.x = x;
 		this.y = y;
 		this.completeArtifact = completeArtifact;
@@ -25,13 +25,6 @@ public class SubArtifactCanister {
 			this.xPixel = completedSubArtifactData[2];
 			this.yPixel = completedSubArtifactData[3];
 		}
-	}
-	
-	public void tick(){
-		
-	}
-	
-	public void render(Screen screen){
 		if(Data == null){
 			if(!completeArtifact){
 				Data = screen.loadData(0, 0, 5, 6, 4, "SubArtifactCanister");
@@ -44,10 +37,18 @@ public class SubArtifactCanister {
 			label = screen.loadData(0, 0, 4, 1, 4, "shardCanisterLabel");
 		}
 		
-		screen.renderData(Data, x, y, 5, 6, 4);
-		screen.renderData(label, x + 48, y + 8, 4, 1, 4);
+	}
+	
+	public void tick(){
+		
+	}
+	
+	public void render(Screen screen){
+		
+		screen.renderData(Data, x + screen.screenX, y + screen.screenY, 5, 6, 4);
+		screen.renderData(label, x + 48 + screen.screenX, y + 8 + screen.screenY, 4, 1, 4);
 		if(completeArtifact){
-			screen.render(x  + (288 / 2) - (xPixel * 8 / 2), y + (384 / 2) - (yPixel * 8 / 2), xTile, yTile, 1, 1, 8, "Icons");
+			screen.render(x  + (288 / 2) - (xPixel * 8 / 2) + screen.screenX, y + (384 / 2) - (yPixel * 8 / 2) + screen.screenY, xTile, yTile, 1, 1, 8, "Icons");
 		}
 	}
 

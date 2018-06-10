@@ -2,7 +2,7 @@ package com.murdermaninc.decorations;
 
 import java.util.ArrayList;
 
-import com.mudermaninc.entity.Player;
+import com.murdermaninc.entity.Player;
 import com.murdermaninc.graphics.Screen;
 
 public class Decoration {
@@ -47,8 +47,9 @@ public class Decoration {
 	
 	public void render(Screen screen, float interpolation){
 		if(Data == null){
-			Data = screen.loadData(xTile, yTile, spriteWidth, spriteHeight, 4, "Icons");
+				Data = screen.loadData(xTile, yTile, spriteWidth, spriteHeight, 4, "Icons");
 		}
+		
 		screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 	}
 	

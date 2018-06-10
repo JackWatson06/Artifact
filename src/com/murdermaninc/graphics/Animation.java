@@ -2,10 +2,15 @@ package com.murdermaninc.graphics;
 
 import java.util.ArrayList;
 
-import com.mudermaninc.entity.Player;
+import com.murdermaninc.entity.Player;
+import com.murdermaninc.main.Log;
 
 public class Animation {
 
+	public static int gameFPS = 60;
+	public static int lastGameFPS = 0;
+	public static boolean updateCounter = false;
+	
 	public boolean random = false;
 	public boolean continuous = false;
 	public boolean timer = false;
@@ -60,6 +65,11 @@ public class Animation {
 		currentSprite = 0;
 		timerCounter = 0;
 		reverseAnimation = false;
+		random = false;
+		collision = false;
+		continuous = false;
+		timer = false;
+		once = true;
 	}
 	
 	public void fadeAnimation(Screen screen, int[] Data, int x, int y, int spriteWidth, int spriteHeight, int scale, float time, boolean fadOut, float fadeTimeOut, float timeOut, float interpolation) {
@@ -266,27 +276,45 @@ public class Animation {
 	
 	//TODO There ARE problems with this
 	public void updateContinuous(int lastFPS, int newFPS){
-		//System.out.println("AnimationCounterBefore: " +  animationCounter);
-		//System.out.println("AnimationCounterExact: " + ((float)(animationCounter / (float) (60 / lastFPS)) * (float)(60 / newFPS)));
-		//if(lastFPS == 10){
-			//System.out.println("Increase to 15 fps, decrease in numbers!");
-		//}else{
-			//System.out.println("Decrease to 10 fps, increase in numbers!");
-		//}
-		animationCounter = (int) Math.round((float)(animationCounter / (float) (60 / lastFPS)) * (float)(60 / newFPS));
-		//System.out.println("AnimationCounterAfter: " +  animationCounter);
-		//System.out.println("CurrentSpriteAfter: " + currentSprite);
+		
+		int oldAnimationSpeed = (int) ((float)gameFPS / lastFPS);
+		int newAnimationSpeed = (int) ((float)gameFPS / newFPS);
+		
+		animationCounter = Math.round(((float) animationCounter * newAnimationSpeed) / oldAnimationSpeed);
+		
+		/*
+		//Testing purposes
+		animationCounter = oldCounter;
+		
+		System.out.println("Old Counter: " + animationCounter);
+		
+		animationCounter = (int) Math.round((float)(animationCounter / (float) (gameFPS / lastFPS)) * (float)(gameFPS / newFPS));
+		
+		System.out.println("New Counter: " + animationCounter);*/
 	}
 	
 	
 	public void animateContinuous(Screen screen, ArrayList<int[]> Data, boolean reverse, float fps, int spriteWidth, int spriteHeight, int x, int y, int totalSprites, int scale, float interpolation){
+		
+		
+		if(updateCounter) {
+			
+			int oldAnimationSpeed = (int) (lastGameFPS / fps);
+			int newAnimationSpeed = (int) (gameFPS / fps);
+			
+			animationCounter = Math.round(((float) animationCounter * newAnimationSpeed) / oldAnimationSpeed);
+
+		}
+		
 		if((!continuous || continuous) && !random && !timer && !collision){
-			int animationSpeed = (int) (60 / fps);
+			int animationSpeed = (int) (gameFPS / fps);
+			
+			//Prevents a divide by zero error which is caused by an extremely low gameFPS resulting in the rounding down to zero
+			if(animationSpeed == 0) animationSpeed = 1;
 			
 			continuous = true;
 			
-			
-			if(animationCounter % animationSpeed == 0 && animationCounter != 0){
+			if(animationCounter % animationSpeed == 0 && animationCounter != 0 && animationCounter <= animationSpeed * totalSprites){
 				if(reverse){
 					int halfway = totalSprites / 2;
 					if(currentSprite < halfway && !reverseAnimation){
@@ -305,25 +333,20 @@ public class Animation {
 				}
 			}
 			
-			/*
-			 * 
-			 * Exception in thread "main" java.lang.IndexOutOfBoundsException: Index: 8, Size: 8
-		at java.util.ArrayList.rangeCheck(Unknown Source)
-		at java.util.ArrayList.get(Unknown Source)
-		at com.murdermaninc.graphics.Animation.animateContinuous(Animation.java:75)
-		at com.mudermaninc.entity.Player.render(Player.java:246)
-		at com.murdermaninc.main.Main.render(Main.java:262)
-		at com.murdermaninc.main.Main.<init>(Main.java:111)
-		at com.murdermaninc.main.Main.main(Main.java:386)
-			 */
 			
-			//currentSprite is to large for the array to load so it produces an error, it should not be 8 probably becouse of updateContinuous
-			//System.out.println("CurrentSprite: " + currentSprite);
-			//System.out.println("AnimationCounter: " + animationCounter);
+			
+			//This is overflow protection (this should theoretically never be called)
+			if(currentSprite >= Data.size() || currentSprite < 0) {
+				
+				Log.write("|||||||!!!!!!! WARNING WARNING CURRENT SPRITE OVERLOAD !!!!!!!||||||||| (Will delete this message later):  " + Integer.toString(currentSprite));
+				currentSprite = 0;
+				System.out.println("|||||||!!!!!!! WARNING WARNING CURRENT SPRITE OVERLOAD !!!!!!!||||||||| (Will delete this message later)");
+
+			}
 			
 			screen.renderData(Data.get(currentSprite), x, y, spriteWidth, spriteHeight, scale);		
 			
-			animationCounter+=(int) interpolation;
+			animationCounter++;
 			
 			if(animationCounter >= animationSpeed * totalSprites){
 				//System.out.println("AnimationReset: " + animationCounter);
@@ -339,8 +362,20 @@ public class Animation {
 	
 	public void animateRandom(Screen screen, ArrayList<int[]> Data, boolean reverse, float fps, int spriteWidth, int spriteHeight, float threshold, int x, int y, int totalSprites, float interpolation){
 		
+		if(updateCounter) {
+			
+			int oldAnimationSpeed = (int) (lastGameFPS / fps);
+			int newAnimationSpeed = (int) (gameFPS / fps);
+			
+			animationCounter = Math.round(((float) animationCounter * newAnimationSpeed) / oldAnimationSpeed);
+
+		}
+		
 		if((Math.random() <= threshold || random) && !continuous && !timer && !collision){
-			int animationSpeed = (int) (60 / fps);
+			int animationSpeed = (int) (gameFPS / fps);
+			
+			//Prevents a divide by zero error which is caused by an extremely low gameFPS resulting in the rounding down to zero
+			if(animationSpeed == 0) animationSpeed = 1;
 			
 			random = true;
 			
@@ -364,11 +399,18 @@ public class Animation {
 				}
 			}
 			
+			//This is overflow protection (this should theoretically never be called)
+			if(currentSprite >= Data.size() || currentSprite < 0) {
+				
+				Log.write("|||||||!!!!!!! WARNING WARNING CURRENT SPRITE OVERLOAD !!!!!!!||||||||| (Will delete this message later):  " + Integer.toString(currentSprite));
+				currentSprite = 0;
+				System.out.println("|||||||!!!!!!! WARNING WARNING CURRENT SPRITE OVERLOAD !!!!!!!||||||||| (Will delete this message later)");
 
+			}
 			
 			screen.renderData(Data.get(currentSprite), x, y, spriteWidth, spriteHeight, 4);		
 			
-			animationCounter+=(int) interpolation;
+			animationCounter++;
 			
 			if(animationCounter >= animationSpeed * totalSprites){
 				random = false;
@@ -382,8 +424,20 @@ public class Animation {
 	
 	public void animateTimer(Screen screen, ArrayList<int[]> Data, boolean reverse, float fps, int spriteWidth, int spriteHeight, int time, int x, int y, int totalSprites, float interpolation){
 		
+		if(updateCounter) {
+			
+			int oldAnimationSpeed = (int) (lastGameFPS / fps);
+			int newAnimationSpeed = (int) (gameFPS / fps);
+			
+			animationCounter = Math.round(((float) animationCounter * newAnimationSpeed) / oldAnimationSpeed);
+
+		}
+		
 		if((timerCounter >= time || timer) && !continuous && !random && !collision){
-			int animationSpeed = (int) (60 / fps);
+			int animationSpeed = (int) (gameFPS / fps);
+			
+			//Prevents a divide by zero error which is caused by an extremely low gameFPS resulting in the rounding down to zero
+			if(animationSpeed == 0) animationSpeed = 1;
 			
 			timer = true;
 			
@@ -407,9 +461,18 @@ public class Animation {
 				}
 			}
 			
+			//This is overflow protection (this should theoretically never be called)
+			if(currentSprite >= Data.size() || currentSprite < 0) {
+				
+				Log.write("|||||||!!!!!!! WARNING WARNING CURRENT SPRITE OVERLOAD !!!!!!!||||||||| (Will delete this message later):  " + Integer.toString(currentSprite));
+				currentSprite = 0;
+				System.out.println("|||||||!!!!!!! WARNING WARNING CURRENT SPRITE OVERLOAD !!!!!!!||||||||| (Will delete this message later)");
+
+			}
+			
 			screen.renderData(Data.get(currentSprite), x, y, spriteWidth, spriteHeight, 4);			
 			
-			animationCounter+=(int) interpolation;
+			animationCounter++;
 			
 			if(animationCounter >= animationSpeed * totalSprites){
 				timer = false;
@@ -424,8 +487,21 @@ public class Animation {
 	}
 	
 	public void animateCollision(Screen screen, Player player,ArrayList<int[]> Data, boolean reverse, float fps, int spriteWidth, int spriteHeight, int x, int y, int yCollisionOffsetU, int yCollisionOffsetB, int xCollisionOffsetL, int xCollisionOffsetR, int totalSprites, float interpolation){
+		
+		if(updateCounter) {
+			
+			int oldAnimationSpeed = (int) (lastGameFPS / fps);
+			int newAnimationSpeed = (int) (gameFPS / fps);
+			
+			animationCounter = Math.round(((float) animationCounter * newAnimationSpeed) / oldAnimationSpeed);
+
+		}
+		
 		if((!collision || collision) && !random && !timer && !continuous){
-			int animationSpeed = (int) (60 / fps);
+			int animationSpeed = (int) (gameFPS / fps);
+			
+			//Prevents a divide by zero error which is caused by an extremely low gameFPS resulting in the rounding down to zero
+			if(animationSpeed == 0) animationSpeed = 1;
 			
 			int yCollisionU = y + yCollisionOffsetU;
 			int yCollisionB = y + yCollisionOffsetB;
@@ -437,7 +513,7 @@ public class Animation {
 			
 			if(player.y + 4 > yCollisionU && player.y + 63 - 4 < yCollisionB && player.x + 8 < xCollisionR && player.x + 63 - 4 > xCollisionL){
 				
-				animationCounter+=(int) interpolation;
+				animationCounter++;
 				
 				if(animationCounter % animationSpeed == 0 && currentSprite < totalSprites){
 					currentSprite++;
@@ -452,6 +528,15 @@ public class Animation {
 				
 			}
 			
+			//This is overflow protection (this should theoretically never be called)
+			if(currentSprite >= Data.size() || currentSprite < 0) {
+				
+				Log.write("|||||||!!!!!!! WARNING WARNING CURRENT SPRITE OVERLOAD !!!!!!!||||||||| (Will delete this message later):  " + Integer.toString(currentSprite));
+				currentSprite = 0;
+				System.out.println("|||||||!!!!!!! WARNING WARNING CURRENT SPRITE OVERLOAD !!!!!!!||||||||| (Will delete this message later)");
+
+			}
+			
 			screen.renderData(Data.get(currentSprite), x, y, spriteWidth, spriteHeight, 4);	
 			
 			
@@ -461,9 +546,25 @@ public class Animation {
 		}
 	}
 	
+	
+
+	
 	public void animateOnce(Screen screen, ArrayList<int[]> Data, boolean reverse, float fps, int spriteWidth, int spriteHeight, int x, int y, int totalSprites, int scale, float interpolation){
+		
+		if(updateCounter) {
+			
+			int oldAnimationSpeed = (int) (lastGameFPS / fps);
+			int newAnimationSpeed = (int) (gameFPS / fps);
+			
+			animationCounter = Math.round(((float) animationCounter * newAnimationSpeed) / oldAnimationSpeed);
+
+		}
+		
 		if(once && !continuous && !random && !timer && !collision){
-			int animationSpeed = (int) (60 / fps);
+			int animationSpeed = (int) (gameFPS / fps);
+			
+			//Prevents a divide by zero error which is caused by an extremely low gameFPS resulting in the rounding down to zero
+			if(animationSpeed == 0) animationSpeed = 1;
 			
 			once = true;
 			
@@ -486,10 +587,19 @@ public class Animation {
 				}
 			}
 			
+			//This is overflow protection (this should theoretically never be called)
+			if(currentSprite >= Data.size() || currentSprite < 0) {
+				
+				Log.write("|||||||!!!!!!! WARNING WARNING CURRENT SPRITE OVERLOAD !!!!!!!||||||||| (Will delete this message later):  " + Integer.toString(currentSprite));
+				currentSprite = 0;
+				System.out.println("|||||||!!!!!!! WARNING WARNING CURRENT SPRITE OVERLOAD !!!!!!!||||||||| (Will delete this message later)");
+
+			}
 			
+			//System.out.println(currentSprite);
 			screen.renderData(Data.get(currentSprite), x, y, spriteWidth, spriteHeight, scale);		
 			
-			animationCounter+=(int) interpolation;
+			animationCounter++;
 			
 			if(animationCounter >= animationSpeed * totalSprites){
 				once = false;

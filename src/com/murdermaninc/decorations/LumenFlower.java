@@ -79,17 +79,27 @@ public class LumenFlower extends Decoration{
 		if(x >= windowLX - screen.screenX && x < windowRX - screen.screenX && y >= windowTY - screen.screenY && y < windowBY - screen.screenY){
 
 			int color = screen.pixels[x + y * screen.width];
+			
+
 
 			//System.out.println(brightness);
 			int r = (color >>> 16) & 0xFF;
 			int g = (color >> 8) & 0xFF;
 			int b = (color) & 0xFF;
+			
+			//System.out.println("Color R Before: " + r);
+			//System.out.println("Color G Before: " + g);
+			//System.out.println("Color B Before: " + b);
+			//System.out.println("Brightness: " + brightness);
 
 			r =  Math.min((int) (r * brightness), 255);
 			g =  Math.min((int) (g * brightness), 255);
 			b =  Math.min((int) (b * brightness), 255);
 
-
+			//System.out.println("Color R After: " + r);
+			//System.out.println("Color G After: " + g);
+			//System.out.println("Color B After: " + b);
+			
 			screen.pixels[x + y * screen.width] = (-1 << 24) | (r << 16) | (g << 8) | (b);
 		}
 	}

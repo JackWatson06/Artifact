@@ -5,11 +5,12 @@ import java.util.ArrayList;
 import com.murdermaninc.graphics.Animation;
 import com.murdermaninc.graphics.MainShipWorldManager;
 import com.murdermaninc.graphics.Screen;
-import com.mudermaninc.entity.*;
+import com.murdermaninc.entity.*;
 
 public class Bed extends DecorationShip{
 
 	private ArrayList<int[]> animationData;
+	private int[] EmptyBedData;
 	
 	private Animation animation = new Animation();
 	
@@ -26,7 +27,7 @@ public class Bed extends DecorationShip{
 	@Override
 	public void tick(){
 		if(!animation.once && manager.player == null){
-			manager.player = new Player("Player", manager.input, null, 1148 + 76, 652 + 64);
+			manager.player = new Player(0, 0, 0, 1, 1, "Player", manager.input, null, 1148 + 76, 652 + 64);
 			manager.player.currentShipRoom = manager.currentRoom;
 			manager.player.facing = true;
 			
@@ -51,14 +52,16 @@ public class Bed extends DecorationShip{
 	@Override
 	public void render(Screen screen, float interpolation){
 		if(animationData == null) animationData = animation.loadAnimationDataRectangle(screen, "playerBed", 4, 16, xTile, yTile, spriteWidth, spriteHeight, 4, 4);
+		if(Data == null) Data = screen.loadData(0, 0, spriteWidth, spriteHeight, 4, "playerBed");
+		if(EmptyBedData == null) EmptyBedData = screen.loadData(0, 0, 3, 2, 4, "shipIcons");
 		
 		
 		if(animation.once && startAnimation){
 			animation.animateOnce(screen, animationData, false, 7F, spriteWidth, spriteHeight, x, y, 16, 4, interpolation);
 		}else if(startAnimation){
-			screen.render(x, y, 0, 0, 3, 2, 4, "shipIcons");
+			screen.renderData(EmptyBedData, x, y, spriteWidth, spriteHeight, 4);
 		}else{
-			screen.render(x, y, 0, 0, spriteWidth, spriteHeight, 4, "playerBed");
+			screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 		}
 	
 	}

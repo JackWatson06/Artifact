@@ -1,8 +1,8 @@
 package com.murdermaninc.decorations;
 
-import com.mudermaninc.entity.Entity;
-import com.mudermaninc.entity.FriendlyLeaf;
-import com.mudermaninc.entity.Player;
+import com.murdermaninc.entity.Entity;
+import com.murdermaninc.entity.FriendlyLeaf;
+import com.murdermaninc.entity.Player;
 import com.murdermaninc.graphics.Screen;
 
 public class Tree extends Decoration{

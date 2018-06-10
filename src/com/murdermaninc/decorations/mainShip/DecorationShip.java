@@ -12,6 +12,7 @@ public class DecorationShip {
 	protected MainShipWorldManager manager;
 	
 	protected int[] Data;
+	
 	public DecorationShip(MainShipWorldManager manager, int x, int y, int xTile, int yTile, int spriteWidth, int spriteHeight){
 		this.manager = manager;
 		this.x = x;

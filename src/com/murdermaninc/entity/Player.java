@@ -1,4 +1,4 @@
-package com.mudermaninc.entity;
+package com.murdermaninc.entity;
 
 import java.util.ArrayList;
 
@@ -20,9 +20,8 @@ public class Player extends Entity {
 	public boolean movedS = false;
 	public boolean movedD = false;
 	public boolean facing = false;
+	public boolean lastFacing = false; //used to compare facing values
 	
-	private int lastX = 0;
-	private int lastY = 0;
 	
 	public boolean isRunning = false;
 	public boolean isClimbingHorizontal = false;
@@ -39,21 +38,32 @@ public class Player extends Entity {
 	private Animation flameAnimation = new Animation();
 	private Animation killAnimation = new Animation();
 	//private Animation climbingAnimation = new Animation();
-	public ArrayList<int[]> runAnimationRight;
-	public ArrayList<int[]> runAnimationLeft;
-	public ArrayList<int[]> jumpFlame;
-	public ArrayList<int[]> deflatKillRight;
-	public ArrayList<int[]> deflatKillLeft;
-	public ArrayList<int[]> climbingRight;
-	public ArrayList<int[]> climbingBackHandRight;
-	public ArrayList<int[]> climbingLeft;
-	public ArrayList<int[]> climbingBackHandLeft;
-	public ArrayList<int[]> poisonKillRight;
-	public ArrayList<int[]> poisonKillLeft;
+	private ArrayList<int[]> runAnimationRight;
+	private ArrayList<int[]> runAnimationLeft;
+	private ArrayList<int[]> jumpFlame;
+	private ArrayList<int[]> deflatKillRight;
+	private ArrayList<int[]> deflatKillLeft;
+	private ArrayList<int[]> drownRight;
+	private ArrayList<int[]> drownLeft;
+	private ArrayList<int[]> climbingRight;
+	private ArrayList<int[]> climbingBackHandRight;
+	private ArrayList<int[]> climbingLeft;
+	private ArrayList<int[]> climbingBackHandLeft;
+	private ArrayList<int[]> poisonKillRight;
+	private ArrayList<int[]> poisonKillLeft;
+	private ArrayList<int[]> disolveRight;
+	private ArrayList<int[]> disolveLeft;
+	private ArrayList<int[]> verticalClimbingRight;
+	private ArrayList<int[]> verticalClimbingLeft;
+	
+	private int[] frontHandRight;
+	private int[] frontHandLeft;
+	private int[] verticalFacingRight;
+	private int[] verticalFacingLeft;
+	private int[] verticalSwingingRight;
+	private int[] verticalSwingingLeft;
 	
 	private int deathX, deathY;
-	
-	private int darkOffset = 0;
 	
 	//Jump Variables
 	public int jumpTick;
@@ -76,6 +86,10 @@ public class Player extends Entity {
 	public int beginningGravityTick;
 	public double currentGravitySpeed;
 	
+	//This is only used when I need to completely disable gravity such as when the player has certain death animations.
+	//If this is set to true it MUST be disabled in order to turn back on gravity.
+	private boolean disableGravity = false;
+	
 	//Dying which causes no control for a short period
 	private String deathTag = new String("");
 	private boolean dying = false;
@@ -91,16 +105,16 @@ public class Player extends Entity {
 	public int leftClimbBound = 0;
 	public int rightClimbBound = 0;
 	
-
+	//This variable is to determine that amount of ticks sense the last time on the ground
+	//and it is used to determine the one pixel offset for the jump.
+	private int lastTimeOnFloor = 0;
 	
 	
 	
-	
-	public Player(String name, InputManager input, Level currentLevel, int x, int y) {
+	public Player(int id, int xTile, int yTile, int spriteWidth, int spriteHeight, String name, InputManager input, Level currentLevel, int x, int y) {
+		super(id, x, y, xTile, yTile, spriteWidth, spriteHeight);
 		this.name = name;
 		this.input = input;
-		this.x = x;
-		this.y = y;
 		this.lastX = x;
 		this.lastY = y;
 		this.currentLevel = currentLevel;
@@ -116,12 +130,21 @@ public class Player extends Entity {
 		lastY = y;
 		
 		if(noControl){
+			if(noControlCounter == 0) {
+				resetGravity(currentTick);
+			}
 			noControlCounter++;
-			if(noControlCounter >= 5){
+			if(noControlCounter >= 17){
 				noControl = false;
 				noControlCounter = 0;
+				resetJump();
 			}
 		}
+		
+		if(gravity) {
+			lastTimeOnFloor++;
+		}
+		
 		
 		//PLAYER NOW JUMPS HIGHER ex. level1-3 i think it may be due to the switch of the jump start from the inputManager to this player class
 		if(input.spaceBar && jumpAvailability && !jump && !dying && !noControl && !isClimbingHorizontal && !isClimbingVertical){
@@ -140,13 +163,15 @@ public class Player extends Entity {
 			jump(currentTick, interpolation);
 		}
 		
-		if(!onElevator){
+		if(!onElevator && !disableGravity){
 			gravity(currentTick, interpolation);
-		}else{
+			
+		}else if(!disableGravity){
 			y++;
 		}
+
 		
-		
+		//System.out.println("Last Time On Floor: " + lastTimeOnFloor);
 		
 		resetButtons();
 		//Jump
@@ -202,32 +227,63 @@ public class Player extends Entity {
 		}
 		
 		if(isClimbingVertical) {
-			if(input.w) {
-				y -= climbingSpeed;
-				movedW = true;
-			}
-			if(input.s) {
-				y += (int) (climbingSpeed * 1.5F);
-				movedS = true;
+			if(input.e) {
+				resetGravity(currentTick);
+				resetJump();
+				jumpCount = 0;
+				jumpAvailability = true;
+				input.e = false;
+				isClimbingVertical = false;
+				animation.resetCurrentAnimation();
 			}
 			
-			if(input.a) {
-				movedA = true;
+			if(input.a) {	
+				movedA = true;	
+				facing = true;
 			}
 			
 			if(input.d) {
 				movedD = true;
+				facing = false;
 			}
+			
+			if(input.w) {
+				movedW = true;
+			}
+			
+			if(input.s) {
+				movedS = true;
+			}
+			
+			if(input.a || input.d){
+				isRunning = true;
+			}else{
+				isRunning = false;
+			}
+			
+			if(facing != lastFacing) {
+				lastFacing = facing;
+				resetAnimation();
+			}
+			
 		}
 		
-		//Detects when the player let goes of a vine
+		
 		if(isClimbingHorizontal){
+			
+			//Detects when the player let goes of a vine
+			
 			if(input.e){
+				resetGravity(currentTick);
+				resetJump();
+				jumpCount = 0;
+				jumpAvailability = true;
 				input.e = false;
 				isClimbingHorizontal = false;
 				animation.resetCurrentAnimation();
 			}
 			
+
 			//Check climbing collisions
 			if(x + 4 <= leftClimbBound){
 				x +=  currentSpeed;
@@ -250,6 +306,8 @@ public class Player extends Entity {
 		}else{
 			checkCollisionShip(currentTick);
 		}
+		
+	
 		
 
 	}
@@ -289,16 +347,24 @@ public class Player extends Entity {
 	
 	public void gravity(int currentTick, float interpolation){
 		if(!jump && !isClimbingHorizontal && !isClimbingVertical && gravity){
+
 			int inputTick = currentTick - beginningGravityTick;
 			jumpBuffer++;
+			
+			//System.out.println(inputTick);
+			//System.out.println(jGTick);
 			if(inputTick <= jGTick){
 				double a = -jGSpeed / Math.pow(jGTick, 2);
 				double equation = ((double)a * Math.pow(inputTick, 2)) + (((double) (-jGTick * 2) * a) * inputTick);
 				y += (int) (equation * interpolation);
+				//System.out.println("Gravity: " + (int) (equation * interpolation));
 				currentGravitySpeed = (int) (equation * interpolation);
 			}else{
 				y += (int) (jGSpeed * interpolation);
 				currentGravitySpeed = (int) (jGSpeed * interpolation);
+				//System.out.println("Y Distance Change: " + (y - startCalculatingY));
+				//System.exit(0);
+				
 			}
 		}else{
 			currentGravitySpeed = 0;
@@ -309,6 +375,8 @@ public class Player extends Entity {
 	
 	public void checkJumpStart(){
 		if(currentLevel != null){
+			//System.out.println("Check Jump Start: " + lastTimeOnFloor);
+			
 			int px = x + 8;
 			int py = y + 4;
 			int pxr = x + 63 - 8;
@@ -330,7 +398,7 @@ public class Player extends Entity {
 				 gR = currentLevel.getBlock((int)Math.floor((pxr + currentSpeed) / 64), (int) Math.floor((pyb + 1) / 64));
 			}
 
-			if(!gL.collisions && !gR.collisions){
+			if(!gL.collisions && !gR.collisions && (lastTimeOnFloor != 1 && lastTimeOnFloor != 2)){
 				jumpingAir = true;
 			}
 		}else{
@@ -437,6 +505,32 @@ public class Player extends Entity {
 			jump = false;
 		}
 		
+		if(specificDeath.equals("drown") && !dying) {
+			dying = true;
+			if(!facing) {
+				deathTag = new String("drownRight");
+			}else {
+				deathTag = new String("drownLeft");
+			}
+			killAnimation.once = true;
+			gravity = false;
+			disableGravity = true;
+			jump = false;
+		}
+		
+		if(specificDeath.equals("disolve") && !dying) {
+			dying = true;
+			if(!facing) {
+				deathTag = new String("disolveRight");
+			}else {
+				deathTag = new String("disolveLeft");
+			}
+			killAnimation.once = true;
+			gravity = true;
+			jump = false;
+			
+		}
+		
 		if(specificDeath.equals("fall") && !dying){
 			deathTag = new String("fall");
 			dying = true;
@@ -455,36 +549,114 @@ public class Player extends Entity {
 	//This keeps track of the animation reset for the switch in player movement from moving left to right
 	private int lastSpeed = 4;
 	
+	//This is used so methods are not randomly checked and called.
+	private boolean animationFound = false;
+	
 	@Override
-	public void render(Screen screen, float interpolation, float testInterpolation){
-		if(runAnimationRight == null) runAnimationRight = animation.loadAnimationData(screen, "player", 4, 8, 0, 1 + darkOffset, 1, 1);
-		if(runAnimationLeft == null) runAnimationLeft = animation.loadAnimationData(screen, "player", 4, 8, 0, 2 + darkOffset, 1, 1);
-		if(jumpFlame == null) jumpFlame = animation.loadAnimationData(screen, "player", 4, 4, 0, 3, 1, 1);
+	public void render(Screen screen, float interpolation){
 		
-		if(currentLevel != null) {
-			if(currentLevel.worldNumber == 1) {
-				if(deflatKillRight == null) deflatKillRight = animation.loadAnimationData(screen, "player", 4, 8, 0, 4 + darkOffset, 1, 1);
-				if(deflatKillLeft == null) deflatKillLeft = animation.loadAnimationData(screen, "player", 4, 8, 0, 5 + darkOffset, 1, 1);
-			}
 		
-			if(currentLevel.worldNumber == 2) {
-				if(climbingRight == null) climbingRight = animation.loadAnimationData(screen, "player", 4, 8, 16, 0, 1, 1);
-				if(climbingLeft == null) climbingLeft = animation.loadAnimationData(screen, "player", 4, 8, 16, 2, 1, 1);
-				if(climbingBackHandRight == null) climbingBackHandRight = animation.loadAnimationData(screen, "player", 4, 8, 16, 1, 1, 1);
-				if(climbingBackHandLeft == null) climbingBackHandLeft = animation.loadAnimationData(screen, "player", 4, 8, 16, 3, 1, 1);
-				if(poisonKillRight == null) poisonKillRight = animation.loadAnimationData(screen, "player", 4, 11, 13, 4, 1, 1);
-				if(poisonKillLeft == null) poisonKillLeft = animation.loadAnimationData(screen, "player", 4, 11, 13, 5, 1, 1);
+		//This section loads all of the animation data for the player
+		//Some animations are specific to a level and are loaded respectively
+		
+		if(!animationFound) {
+			
+			if(currentLevel != null && currentLevel.isDarkened()) {
+				
+				if(runAnimationRight == null) runAnimationRight = animation.loadAnimationData(screen, "player", 4, 8, 0, 7, 1, 1);
+				if(runAnimationLeft == null) runAnimationLeft = animation.loadAnimationData(screen, "player", 4, 8, 0, 8, 1, 1);
+				
+			}else{
+				
+				if(runAnimationRight == null) runAnimationRight = animation.loadAnimationData(screen, "player", 4, 8, 0, 1, 1, 1);
+				if(runAnimationLeft == null) runAnimationLeft = animation.loadAnimationData(screen, "player", 4, 8, 0, 2, 1, 1);
+				
 			}
+
+			if(jumpFlame == null) jumpFlame = animation.loadAnimationData(screen, "player", 4, 4, 0, 3, 1, 1);
+
+			if(currentLevel != null && !animationFound) {
+
+				//Deflat animation for light and dark levels
+				if(currentLevel.containsDeathTag("deflat") && currentLevel.isDarkened()) {
+
+					if(deflatKillRight == null) deflatKillRight = animation.loadAnimationData(screen, "player", 4, 8, 0, 10, 1, 1);
+					if(deflatKillLeft == null) deflatKillLeft = animation.loadAnimationData(screen, "player", 4, 8, 0, 11, 1, 1);
+
+				}else if(currentLevel.containsDeathTag("deflat")) {
+
+					if(deflatKillRight == null) deflatKillRight = animation.loadAnimationData(screen, "player", 4, 8, 0, 4, 1, 1);
+					if(deflatKillLeft == null) deflatKillLeft = animation.loadAnimationData(screen, "player", 4, 8, 0, 5, 1, 1);
+
+				}
+
+				//Drown animation data for light and dark levels
+				if(currentLevel.containsDeathTag("drown") && currentLevel.isDarkened()) {
+
+					if(drownRight == null) drownRight = animation.loadAnimationData(screen, "player", 4, 11, 0, 13, 1, 1);
+					if(drownLeft == null) drownLeft = animation.loadAnimationData(screen, "player", 4, 11, 0, 14, 1, 1);
+
+				}else if(currentLevel.containsDeathTag("drown")) {
+
+					if(drownRight == null) drownRight = animation.loadAnimationData(screen, "player", 4, 11, 13, 6, 1, 1);
+					if(drownLeft == null) drownLeft = animation.loadAnimationData(screen, "player", 4, 11, 13, 7, 1, 1);
+
+				}
+				
+				
+				//Disolve animation data for light and dark levels
+				
+				if(currentLevel.containsDeathTag("disolve") && currentLevel.isDarkened()) {
+					
+					if(disolveRight == null) disolveRight = animation.loadAnimationData(screen, "player", 4, 8, 0, 15, 1, 1);
+					if(disolveLeft == null) disolveLeft = animation.loadAnimationData(screen, "player", 4, 8, 0, 16, 1, 1);
+					
+				}else if(currentLevel.containsDeathTag("disolve")) {
+					
+					if(disolveRight == null) disolveRight = animation.loadAnimationData(screen, "player", 4, 8, 16, 8, 1, 1);
+					if(disolveLeft == null) disolveLeft = animation.loadAnimationData(screen, "player", 4, 8, 16, 9, 1, 1);
+					
+				}
+				
+				//Climbing Horizontal Animations
+				
+				if(currentLevel.containsDecorations(new int[] {2052, 2053, 2054})) {
+					if(climbingRight == null) climbingRight = animation.loadAnimationData(screen, "player", 4, 8, 16, 0, 1, 1);
+					if(climbingLeft == null) climbingLeft = animation.loadAnimationData(screen, "player", 4, 8, 16, 2, 1, 1);
+					if(climbingBackHandRight == null) climbingBackHandRight = animation.loadAnimationData(screen, "player", 4, 8, 16, 1, 1, 1);
+					if(climbingBackHandLeft == null) climbingBackHandLeft = animation.loadAnimationData(screen, "player", 4, 8, 16, 3, 1, 1);
+				}
+				
+				//Poison Animation
+				
+				if(currentLevel.containsDeathTag("poison")) {
+					
+					if(poisonKillRight == null) poisonKillRight = animation.loadAnimationData(screen, "player", 4, 11, 13, 4, 1, 1);
+					if(poisonKillLeft == null) poisonKillLeft = animation.loadAnimationData(screen, "player", 4, 11, 13, 5, 1, 1);
+					
+				}
+				
+				//Climbing Vertical Animations
+				if(currentLevel.containsDecorations(new int[] {2058})) {
+					if(frontHandRight == null) frontHandRight = screen.loadData(23, 11, 1, 1, 4, "player");
+					if(frontHandLeft == null) frontHandLeft = screen.loadData(23, 13, 1, 1, 4, "player");
+					if(verticalClimbingRight == null) verticalClimbingRight = animation.loadAnimationData(screen, "player", 4, 5, 19, 10, 1, 1);
+					if(verticalClimbingLeft == null) verticalClimbingLeft = animation.loadAnimationData(screen, "player", 4, 5, 19, 12, 1, 1);
+					if(verticalFacingRight == null) verticalFacingRight = screen.loadData(19, 10, 1, 1, 4, "player");
+					if(verticalFacingLeft == null) verticalFacingLeft = screen.loadData(19, 12, 1, 1, 4, "player");
+					if(verticalSwingingRight == null) verticalSwingingRight = screen.loadData(23, 10, 1, 1, 4, "player");
+					if(verticalSwingingLeft == null) verticalSwingingLeft = screen.loadData(23, 12, 1, 1, 4, "player");
+				}
+
+			}
+			
+			animationFound = true;
+			
 		}
 
-		int testingX = (int) ((x - lastX) * interpolation + lastX);
-		int testingY = (int) ((y - lastY) * interpolation + lastY);
-		
-		//System.out.println("Testing X: " + testingX + " Actual X: " + x);
-		//System.out.println("Testing Y: " + testingY + " Actual Y: " + y);
 		
 		if(jumpingAir){
-			flameAnimation.animateOnce(screen, jumpFlame, false, 10.0F, 1, 1, testingX + 16, testingY + 60, 4, 4, interpolation);
+			flameAnimation.animateOnce(screen, jumpFlame, false, 10.0F, 1, 1, x + 16, y + 60, 4, 4, interpolation);
 		}else{
 			flameAnimation.resetCurrentAnimation();
 		}
@@ -496,6 +668,9 @@ public class Player extends Entity {
 		}
 		
 		if(isRunning && !dying && !isClimbingHorizontal && !isClimbingVertical){
+			
+			//Running animations
+			
 			
 			if(currentSpeed != lastSpeed){
 				if(currentSpeed == runningSpeed){
@@ -509,19 +684,34 @@ public class Player extends Entity {
 			lastSpeed = currentSpeed;
 			
 			if(movedD){
-				animation.animateContinuous(screen, runAnimationRight, false, fps, 1, 1, testingX, testingY, 8, 4, interpolation);
+				animation.animateContinuous(screen, runAnimationRight, false, fps, 1, 1, x, y, 8, 4, interpolation);
 			}else if(movedA){
-				animation.animateContinuous(screen, runAnimationLeft, false, fps, 1, 1, testingX, testingY, 8, 4, interpolation);
+				animation.animateContinuous(screen, runAnimationLeft, false, fps, 1, 1, x, y, 8, 4, interpolation);
 			}
 
-		}else if(!dying && !isClimbingHorizontal){
+		}else if(!dying && !isClimbingHorizontal && !isClimbingVertical){
+			
+			//Render basic standing position
+			
 			if(!facing){
-				screen.render(x, y, 0, 1 + darkOffset, 1, 1, 4, "player");
+				if(currentLevel != null && currentLevel.isDarkened()) {
+					screen.render(x, y, 0, 7, 1, 1, 4, "player");
+				}else {
+					screen.render(x, y, 0, 1, 1, 1, 4, "player");
+				}
 				//killAnimation.animateContinuous(screen, poisonKillRight, false, 8, 1, 1, x, y, 10, 4);
 			}else{
-				screen.render(x, y, 0, 2 + darkOffset, 1, 1, 4, "player");
+				if(currentLevel != null && currentLevel.isDarkened()) {
+					screen.render(x, y, 0, 8, 1, 1, 4, "player");
+				}else {
+					screen.render(x, y, 0, 2, 1, 1, 4, "player");
+				}
 			}
-		}else if(isClimbingHorizontal && isClimbingVertical && !dying){
+		}else if(isClimbingHorizontal && !dying && !isClimbingVertical){
+			
+			//Render for climbing horizontally
+			
+			
 			if(isRunning){
 				if(!facing){
 					animation.animateContinuous(screen, climbingRight, false, 7F, 1, 1, x, y, 8, 4, interpolation);
@@ -535,10 +725,18 @@ public class Player extends Entity {
 					screen.render(x, y, 14, 1, 1, 1, 4, "player");
 				}
 			}
+		}else if(isClimbingVertical && !dying) {
+			
+			if(!facing){
+				screen.renderData(frontHandRight, x, y, 1, 1, 4);
+			}else{
+				screen.renderData(frontHandLeft, x, y, 1, 1, 4);
+			}
+				
 		}
 		
 		if(dying){
-			System.out.println(deathTag);
+			//System.out.println(deathTag);
 			if(deathTag.equals("deflatLeft")){
 				killAnimation.animateOnce(screen, deflatKillLeft, false, 8, 1, 1, x, y, 8, 4, interpolation);
 				if(!killAnimation.once){
@@ -566,6 +764,42 @@ public class Player extends Entity {
 					killXY();
 					dying = false;
 				}
+			}else if(deathTag.equals("drownRight")) {
+				
+				//Needs to be updated
+				killAnimation.animateOnce(screen, drownRight, false, 10, 1, 1, x, y, 11, 4, interpolation);
+				if(!killAnimation.once){
+					killXY();
+					dying = false;
+					disableGravity = false;
+				}
+			}else if(deathTag.equals("drownLeft")) {
+				
+				//Needs to be updated
+				killAnimation.animateOnce(screen, drownLeft, false, 10, 1, 1, x, y, 11, 4, interpolation);
+				if(!killAnimation.once){
+					killXY();
+					dying = false;
+					disableGravity = false;
+				}
+			}else if(deathTag.equals("disolveRight")) {
+				
+				//Needs to be updated
+				killAnimation.animateOnce(screen, disolveRight, false, 10, 1, 1, x, y, 8, 4, interpolation);
+				if(!killAnimation.once){
+					killXY();
+					dying = false;
+					disableGravity = false;
+				}
+			}else if(deathTag.equals("disolveLeft")) {
+				
+				//Needs to be updated
+				killAnimation.animateOnce(screen, disolveLeft, false, 10, 1, 1, x, y, 8, 4, interpolation);
+				if(!killAnimation.once){
+					killXY();
+					dying = false;
+					disableGravity = false;
+				}
 			}
 		}
 		
@@ -575,21 +809,49 @@ public class Player extends Entity {
 		
 	}
 	
-	public void renderBeforeAllDecorations(Screen screen){
-		if(isClimbingHorizontal) {
+	public void renderBeforeAllDecorations(Screen screen, float interpolation){
+		if(isClimbingHorizontal && !isClimbingVertical) {
 			if(isRunning){
 				if(!facing){
+					//System.out.println("Testing");
 					screen.renderData(climbingBackHandRight.get(animation.getCurrentSprite()), x, y, 1, 1, 4);
 				}else{
 					screen.renderData(climbingBackHandLeft.get(animation.getCurrentSprite()), x, y, 1, 1, 4);
 				}
 			}
+			
+		}else if(isClimbingVertical) {
+			if(isRunning){
+				if(!facing){
+					
+					//System.out.println(animation.once);
+					
+					if(animation.once) {
+						animation.animateOnce(screen, verticalClimbingRight, false, 10F, 1, 1, x, y, 5, 4, interpolation);
+					}else {
+						screen.renderData(verticalSwingingRight, x, y, 1, 1, 4);
+					}
+				}else{
+					
+					if(animation.once) {
+						animation.animateOnce(screen, verticalClimbingLeft, false, 10F, 1, 1, x, y, 5, 4, interpolation);
+					}else {
+						screen.renderData(verticalSwingingLeft, x, y, 1, 1, 4);
+					}
+				}
+			}else {
+				
+				if(!facing){
+						screen.renderData(verticalFacingRight, x, y, 1, 1, 4);
+
+				}else{	
+						screen.renderData(verticalFacingLeft, x, y, 1, 1, 4);
+				}
+				
+			}
 		}
 	}
 	
-	public void setDarkOffset(int darkOffset){
-		this.darkOffset = darkOffset;
-	}
 	
 	public void resetAnimation(){
 		animation.resetCurrentAnimation();
@@ -638,9 +900,40 @@ public class Player extends Entity {
 			 gL = currentLevel.getBlock((int)Math.floor((px + currentSpeed)  / 64), (int) Math.floor((pyb + 1) / 64));
 			 gR = currentLevel.getBlock((int)Math.floor((pxr + currentSpeed) / 64), (int) Math.floor((pyb + 1) / 64));
 		}
+		
+		if(uR.collisions && uL.collisions && bL.collisions) {
+			 gL = currentLevel.getBlock((int)Math.floor((px + currentSpeed)  / 64), (int) Math.floor((pyb + 1) / 64));
+			 gR = currentLevel.getBlock((int)Math.floor((pxr + currentSpeed) / 64), (int) Math.floor((pyb + 1) / 64));
+		}
+		
+		if(uR.collisions && uL.collisions && bR.collisions) {
+			 gL = currentLevel.getBlock((int)Math.floor((px - currentSpeed)  / 64), (int) Math.floor((pyb + 1) / 64));
+			 gR = currentLevel.getBlock((int)Math.floor((pxr - currentSpeed) / 64), (int) Math.floor((pyb + 1) / 64));
+		}
+		
+		
 		if((!gL.collisions && !gR.collisions) && !jump && !gravity){
 			gravity = true;
 			resetGravity(currentTick);
+		}
+		
+		//System.out.println("PlayerX: " + x);
+		//System.out.println("PlayerY: " + y);
+		//System.out.println("PlayerYBottom: " + (y + 64));
+		//System.out.println("Jump: " + jump);
+		//System.out.println("Jump Count: " + jumpCount);
+		//System.out.println("Jump Availability: " + jumpAvailability);
+		//System.out.println("Gravity: " + gravity);
+		//System.out.println("GL: " + gL.collisions);
+		//System.out.println("GRY: " + (gR.y * 64));
+		
+		
+		
+		if((gL.collisions || gR.collisions) && !jump) {
+			//This is necessary to prevent the player from landing perfectly on a block then the jumpCount would not reset, which would cause the player to not be able to jump
+			//System.out.println("Testing!");
+			jumpCount = 0;
+			jumpAvailability = true;
 		}
 		
 		
@@ -762,6 +1055,7 @@ public class Player extends Entity {
 			
 		}
 		
+		
 		boolean data = false;
 		if(data){
 			System.out.println("UboveL: " + uL);
@@ -776,8 +1070,15 @@ public class Player extends Entity {
 			System.out.println("Player Y: " + y);
 			System.out.println(currentTick);
 		}
+		
+		//System.out.println("Gravity: " + gravity);
+		//System.out.println("Jumping: " + jump);
+		//System.out.println("Player X: " + x);
+		//System.out.println("Player Y: " + y);
 
 		if(setDown){
+			
+			//System.out.println("Set Down");
 			
 			if(!notFull){
 				y = (uR.y * 64) + 60;
@@ -787,9 +1088,12 @@ public class Player extends Entity {
 			
 			jump = false;
 			jumpBuffer = 0;
-			resetJump();		
+			resetJump();	
+			
 		}
 		if(setUp){
+			
+			//System.out.println("Set Up");
 			
 			if(!notFull){
 				y = (bR.y * 64) - 64;
@@ -800,8 +1104,12 @@ public class Player extends Entity {
 			jumpAvailability = true;
 			jumpCount = 0;
 			gravity = false;
+			
+			lastTimeOnFloor = 0;
 		}
 		if(setLeft){
+			
+			//System.out.println("Set Left: " + bR);
 			
 			if(!notFull){
 				x = (uR.x * 64) - 56;
@@ -812,6 +1120,8 @@ public class Player extends Entity {
 		}
 		if(setRight){
 
+			//System.out.println("Set Right");
+			
 			if(!notFull){
 				x = (uL.x * 64) + 56;
 			}else{
@@ -821,9 +1131,14 @@ public class Player extends Entity {
 		}
 	}
 	
+	//This is to set the elevator mainly just to test for collisions.
+	
 	public void setElevator(Elevator elevator){
 		this.elevator = elevator;
 	}
+	
+	
+	//THESE ARE THE COLLISIONS FOR THE SHIP
 	
 	public void checkCollisionShip(int currentTick){
 		if(currentShipRoom.equals(new String("room"))){
@@ -1121,6 +1436,122 @@ public class Player extends Entity {
 }
 
 
+/*
+ * Jump: false
+JumpCounter: 0
+Jump Buffer: 48
+No Control Finished
+Jump: false
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: true
+JumpCounter: 0
+Jump Buffer: 49
+Jump: false
+JumpCounter: 0
+Jump Buffer: 0
+Check Jump Start: 1
+Jump: true
+JumpCounter: 1
+Jump Buffer: 0
+Jump: true
+JumpCounter: 1
+Jump Buffer: 0
+ * 
+ */
 
 
 

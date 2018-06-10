@@ -1,4 +1,4 @@
-package com.mudermaninc.entity;
+package com.murdermaninc.entity;
 
 import java.util.ArrayList;
 
@@ -19,16 +19,24 @@ public class Entity {
 	public String name;
 	
 	public ArrayList<int[]> AnimationData;
+	public int[] Data;
 	
-	public Entity(){
-
+	public Entity(int id, int x, int y, int xTile, int yTile, int spriteWidth, int spriteHeight){
+		this.id = id;
+		this.x = x;
+		this.y = y;
+		this.xTile = xTile;
+		this.yTile = yTile;
+		this.spriteWidth = spriteWidth;
+		this.spriteHeight = spriteHeight;
 	}
 	
-	public void tick(Level level){
+	
+	public void tick(Level level, Player player){
 		
 	}
 	
-	public void render(Screen screen, float interpolation, float testInterpolation){
+	public void render(Screen screen, float interpolation){
 		
 	}
 	

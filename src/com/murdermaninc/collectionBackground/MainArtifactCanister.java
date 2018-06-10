@@ -21,11 +21,16 @@ public class MainArtifactCanister {
 	
 	private boolean testing = true;
 	
-	public MainArtifactCanister(int currentArtXTile, int currentArtYTile, int artWidthPixels, int artHeightPixels){
+	public MainArtifactCanister(Screen screen, int currentArtXTile, int currentArtYTile, int artWidthPixels, int artHeightPixels){
 		artXTile = currentArtXTile;
 		artYTile = currentArtYTile;
 		this.artWidthPixels = artWidthPixels;
 		this.artHeightPixels = artHeightPixels;
+		
+		if(testing){
+			Data.add(screen.loadData(0, 0, 7, 9, 4, "ArtifactCell"));
+			testing = false;
+		}
 	}
 	
 	private boolean reverse = true;
@@ -64,14 +69,10 @@ public class MainArtifactCanister {
 	}
 	
 	public void render(Screen screen){
-		if(testing){
-			Data.add(screen.loadData(0, 0, 7, 9, 4, "ArtifactCell"));
-			testing = false;
-		}
 		
-		screen.renderData(Data.get(0), x, y, 7, 9, 4);
+		screen.renderData(Data.get(0), x + screen.screenX, y + screen.screenY, 7, 9, 4);
 		
-		screen.render(x +  (392 / 2) - (artWidthPixels * 20 / 2), y + (536 / 2) - (artHeightPixels * 20 / 2), artXTile, artYTile, 1, 1, 20, "Icons");
+		screen.render(x +  (392 / 2) - (artWidthPixels * 20 / 2) + screen.screenX, y + (536 / 2) - (artHeightPixels * 20 / 2) + screen.screenY, artXTile, artYTile, 1, 1, 20, "Icons");
 	}
 
 }

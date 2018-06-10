@@ -1,7 +1,6 @@
 package com.murdermaninc.decorations.mainShip;
 
 
-import com.murdermaninc.graphics.Animation;
 import com.murdermaninc.graphics.Font;
 import com.murdermaninc.graphics.MainShipWorldManager;
 import com.murdermaninc.graphics.Screen;
@@ -12,7 +11,6 @@ public class Monitor extends DecorationShip{
 	
 	private Font font = new Font();
 	
-	private Animation animation = new Animation();
 	
 	public String currentLevel = new String("Level1-1");
 	public int currentLevelNumber = 1;
@@ -29,19 +27,21 @@ public class Monitor extends DecorationShip{
 	private int levelShardsNumber = 0;
 	private int displayPercentageNumber = 0;
 	
-	private Lever lever;
 	private LevelSequencing levelS;
 	
 	private boolean displayLock = false;
 	
-	public Monitor(MainShipWorldManager manager, Lever lever, LevelSequencing levelS, int currentWorldNumber, int x, int y, int xTile, int yTile, int spriteWidth, int spriteHeight) {
+	//this is necessary to see the update of the actual level number
+	public int lastLevelNumber = currentLevelNumber;
+	
+	public Monitor(MainShipWorldManager manager, LevelSequencing levelS, int currentWorldNumber, int currentLevelNumber, int x, int y, int xTile, int yTile, int spriteWidth, int spriteHeight) {
 		
 		super(manager, x, y, xTile, yTile, spriteWidth, spriteHeight);
-		this.lever = lever;
 		this.levelS = levelS;
 		this.currentWorldNumber = currentWorldNumber;
+		this.currentLevelNumber = currentLevelNumber;
 		
-		currentLevel = "Level" + currentWorldNumber + "-" + lever.leverNumber;
+		currentLevel = "Level" + currentWorldNumber + "-" + currentLevelNumber;
 		if(!levelS.levelAvailability[((currentWorldNumber - 1) * 16) + currentLevelNumber - 1]){
 			displayLock = true;
 		}
@@ -66,10 +66,12 @@ public class Monitor extends DecorationShip{
 	public void tick(){
 		
 		//Replace the second half with a check for if the level is unlocked or not
-		if(currentLevelNumber != lever.leverNumber && levelS.levelAvailability[((currentWorldNumber - 1) * 16) + lever.leverNumber - 1]){
-			currentLevelNumber = lever.leverNumber;
+		
+		
+		if(currentLevelNumber != lastLevelNumber && levelS.levelAvailability[((currentWorldNumber - 1) * 16) + currentLevelNumber - 1]){
+			lastLevelNumber = currentLevelNumber;
 			
-			currentLevel = "Level" + currentWorldNumber + "-" + lever.leverNumber;
+			currentLevel = "Level" + currentWorldNumber + "-" + currentLevelNumber;
 			displayLock = false;
 			
 			displayTime =  String.valueOf(levelS.levelTime[((currentWorldNumber - 1) * 16) + currentLevelNumber - 1]) + "s";
@@ -90,10 +92,10 @@ public class Monitor extends DecorationShip{
 			
 			
 			
-		}else if(currentLevelNumber != lever.leverNumber){
-			currentLevelNumber = lever.leverNumber;
+		}else if(currentLevelNumber != lastLevelNumber){
+			lastLevelNumber = currentLevelNumber;
 			
-			currentLevel = "Level" + currentWorldNumber + "-" + lever.leverNumber;
+			currentLevel = "Level" + currentWorldNumber + "-" + currentLevelNumber;
 			displayLock = true;
 			
 			displayTime =  String.valueOf(levelS.levelTime[((currentWorldNumber - 1) * 16) + currentLevelNumber - 1]) + "s";
@@ -131,6 +133,9 @@ public class Monitor extends DecorationShip{
 	
 	@Override
 	public void render(Screen screen, float interpolation){
+		
+		if(Data == null) Data = screen.loadData(xTile, yTile, spriteWidth, spriteHeight, 4, "shipIcons");
+		
 										//gap between
 		int sizeOfTotalFont = (12 * 3) + (24 * 3) + (8 * 3) + (14 * 2) + (14 * 2) + (12 * 2) + (8 * 4) + (7 * 4) + (9 * 4);
 		
@@ -144,9 +149,7 @@ public class Monitor extends DecorationShip{
 						//Offset from top	//Width of title	//height between data
 		int yOffset = y + (360 / 2) - (sizeOfTotalFont / 2) + (12 * 3) + 24;
 		
-		if(!animation.random){
-			screen.render(x, y, xTile, yTile, spriteWidth, spriteHeight, 4, "shipIcons");
-		}
+		screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 		
 		String levelDisplay = currentLevel.substring(0, 5) + " " + currentLevel.substring(7);																//This is the leftover at the top of font
 		font.drawText(screen, levelDisplay, x + (308 / 2) - (font.getTextLength(levelDisplay, largeFontScale) / 2), y + (360 / 2) - (sizeOfTotalFont / 2) - (4 * 3), largeFontScale);

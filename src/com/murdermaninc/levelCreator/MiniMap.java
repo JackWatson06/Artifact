@@ -8,18 +8,15 @@ public class MiniMap {
 	public int levelWidth, levelHeight;
 	public int scale = 5;
 	
-	public int width;
-	
 	private int xp = 10;
 	private int yp = 10;
 	
 	private Main main;
 	
-	public MiniMap(Main main,int levelWidth, int levelHeight, int width, int[] blocks, int[] decorations, int[] subArtifacts){
+	public MiniMap(Main main,int levelWidth, int levelHeight, int[] blocks, int[] decorations, int[] subArtifacts){
 		this.main = main;
 		this.levelWidth = levelWidth;
 		this.levelHeight = levelHeight;
-		this.width = width;
 		pixels = new int[levelWidth * levelHeight];
 		for(int i = 0; i < blocks.length; i++){
 			if(blocks[i] != 0){
@@ -120,13 +117,22 @@ public class MiniMap {
 		}
 	}
 	
-	public void render(Screen screen, InputManager input){
+	public void render(Screen screen, InputManager input, int width, int height){
 		if(input.m){
+			
+			int windowLX = 0;
+			int windowRX = width;
+			int windowTY = 0;
+			int windowBY = height;
+			
 			for(int y = 0; y < levelHeight * scale; y++){
 				for(int x = 0; x < levelWidth * scale; x++){
-					screen.pixels[(xp + x) + ((yp + y) * width)] = scaledPixels[x + y * levelWidth * scale];
+					if(xp + x >= windowLX && xp + x < windowRX && yp + y >= windowTY && yp + y < windowBY){
+						screen.pixels[(xp + x) + ((yp + y) * width)] = scaledPixels[x + y * levelWidth * scale];
+					}
 				}
 			}
+			
 		}
 	}
 }

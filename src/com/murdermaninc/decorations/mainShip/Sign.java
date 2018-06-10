@@ -44,6 +44,8 @@ public class Sign extends DecorationShip{
 
 	@Override
 	public void render(Screen screen, float interpolation){
+		if(Data == null) Data = screen.loadData(xTile, yTile, spriteWidth, spriteHeight, 4, "shipIcons");
+		
 		if(displaySign){
 			if(!smallDoor && !signPosition){
 				font.drawText(screen, displayText, x - 122 - (font.getTextLength(displayText, 3) / 2), y - 256, 3);
@@ -55,7 +57,7 @@ public class Sign extends DecorationShip{
 				font.drawText(screen, displayText, x + 64 + 122 - (font.getTextLength(displayText, 3) / 2), y - 256, 3);
 			}
 		}
-		screen.render(x, y, xTile, yTile, spriteWidth, spriteHeight, 4, "shipIcons");
+		screen.renderData(Data, x, y, spriteWidth, spriteHeight, 4);
 	}
 
 

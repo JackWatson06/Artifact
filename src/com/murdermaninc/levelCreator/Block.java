@@ -10,6 +10,8 @@ public class Block {
 	
 	public Block(int id, int x, int y){
 		this.id = id;
+		this.x = x;
+		this.y = y;
 	}
 	
 	public Block(int id, int x, int y, int xTile, int yTile){

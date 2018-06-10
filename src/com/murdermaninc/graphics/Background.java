@@ -23,6 +23,8 @@ public class Background {
 			width = image.getWidth();
 			if(!scaleBackground){
 				pixels = image.getRGB(0, 0, width, height, null, 0, width);
+				scaledWidth = width;
+				scaledHeight = height;
 			}else{
 				scaledDown = image.getRGB(0, 0, width, height, null, 0, width);
 			}
@@ -32,6 +34,9 @@ public class Background {
 	}
 	
 	public void scaleImage(int scale, int screenWidth, int screenHeight) {
+		
+		//This is for scaling an image to a meet the desired constraints.
+		
 		this.scaledWidth = screenWidth;
 		this.scaledHeight = screenHeight;
 		pixels = new int[screenWidth * screenHeight];
@@ -46,9 +51,13 @@ public class Background {
 			}
 		}
 		
+		
 	}
 	
 	public void scaleImage(int scale) {
+		
+		//This just scales the image by the designated scale.
+		
 		this.scaledWidth = width * scale;
 		this.scaledHeight = height * scale;
 		pixels = new int[scaledWidth * scaledHeight];
